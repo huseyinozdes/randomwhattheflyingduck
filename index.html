@@ -72,16 +72,17 @@
       gap: 2px;
       overflow-x: auto;
       padding-bottom: 4px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--line, #3a3a3a);
     }
 
     .tab {
-      padding: 6px 10px;
+      padding: 6px 12px;
       border: 1px solid var(--line, #3a3a3a);
       background: rgb(22, 22, 22);
       color: rgb(138, 138, 138);
       cursor: pointer;
-      transition: background-color 0.12s ease;
+      transition: all 0.12s ease;
       font-size: 11px;
       font-weight: 400;
       white-space: nowrap;
@@ -90,40 +91,14 @@
 
     .tab:hover {
       background: rgb(28, 28, 28);
+      color: rgb(189, 189, 189);
     }
 
     .tab.active {
       background: rgb(40, 40, 40);
-      color: rgb(245, 245, 245);
+      color: rgb(100, 180, 255);
       font-weight: 700;
-      border-bottom-color: rgb(100, 180, 255);
-    }
-
-    .tab-label {
-      display: inline-block;
-      cursor: pointer;
-      max-width: 80px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tab-label.editing {
-      display: none;
-    }
-
-    .tab-label-input {
-      width: 70px;
-      background: rgb(28, 28, 28);
-      border: 1px solid rgb(100, 180, 255);
-      color: rgb(229, 229, 229);
-      padding: 2px 4px;
-      font-family: inherit;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .tab-label-input.visible {
-      display: inline-block;
+      border-bottom: 2px solid rgb(100, 180, 255);
     }
 
     .tab-content {
@@ -161,7 +136,7 @@
 
     .converter-swap:hover {
       background: rgb(40, 40, 40);
-      color: rgb(229, 229, 229);
+      color: rgb(100, 180, 255);
     }
 
     .cad-preview {
@@ -208,13 +183,6 @@
       margin-top: 3px;
       line-height: 1.3;
     }
-
-    .cad-success {
-      font-size: 10px;
-      color: rgb(100, 180, 100);
-      margin-top: 3px;
-      line-height: 1.3;
-    }
   </style>
 </head>
 
@@ -232,7 +200,7 @@
           <label for="user-initials" class="text-[11px] text-neutral-400" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 11px;">OPERATOR INITIALS</label>
           <input id="user-initials" type="text" class="native-input brd bg-transparent px-2 py-1 text-[12px] w-20 text-neutral-200 text-center" maxlength="8" placeholder="ENG" style="color: rgb(229, 229, 229);">
         </div>
-        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 12px;">build 1.2.0 // status: online</p>
+        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 12px;">build 1.3.1 // status: online</p>
       </div>
     </header>
 
@@ -323,35 +291,17 @@
           <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 03 ] TOOLS</h2>
           
           <!-- Tab Bar -->
-          <div class="tab-bar mt-4 mb-4">
-            <div class="tab active" onclick="switchTab(0)" data-tab="0">
-              <span class="tab-label" onclick="editTabName(0, event)">IMAGE</span>
-              <input type="text" class="tab-label-input" id="tab-input-0" maxlength="12" value="IMAGE">
-            </div>
-            <div class="tab" onclick="switchTab(1)" data-tab="1">
-              <span class="tab-label" onclick="editTabName(1, event)">CONVERT</span>
-              <input type="text" class="tab-label-input" id="tab-input-1" maxlength="12" value="CONVERT">
-            </div>
-            <div class="tab" onclick="switchTab(2)" data-tab="2">
-              <span class="tab-label" onclick="editTabName(2, event)">CAD</span>
-              <input type="text" class="tab-label-input" id="tab-input-2" maxlength="12" value="CAD">
-            </div>
-            <div class="tab" onclick="switchTab(3)" data-tab="3">
-              <span class="tab-label" onclick="editTabName(3, event)">DATE</span>
-              <input type="text" class="tab-label-input" id="tab-input-3" maxlength="12" value="DATE">
-            </div>
+          <div class="tab-bar">
+            <button class="tab active" onclick="switchTab(0)" style="border-bottom: 2px solid rgb(100, 180, 255);">CONVERT</button>
+            <button class="tab" onclick="switchTab(1)">CAD</button>
+            <button class="tab" onclick="switchTab(2)">DATE</button>
           </div>
 
           <!-- Tab Contents -->
           <div class="flex-1 overflow-y-auto">
 
-            <!-- TAB 0: IMAGE INFO (placeholder) -->
+            <!-- TAB 0: CONVERSIONS -->
             <div class="tab-content active" id="tab-0">
-              <p style="color: rgb(122, 122, 122); font-size: 12px;">Image processing tools are in the left panel.</p>
-            </div>
-
-            <!-- TAB 1: CONVERSIONS -->
-            <div class="tab-content" id="tab-1">
               <p style="color: rgb(122, 122, 122); font-size: 12px; margin-bottom: 12px;">Bidirectional engineering unit conversions.</p>
 
               <!-- Length: Inches <-> Millimeters -->
@@ -407,8 +357,8 @@
               </div>
             </div>
 
-            <!-- TAB 2: CAD -->
-            <div class="tab-content" id="tab-2">
+            <!-- TAB 1: CAD -->
+            <div class="tab-content" id="tab-1">
               <p style="color: rgb(122, 122, 122); font-size: 12px; margin-bottom: 12px;">CAD format conversions & compression info.</p>
 
               <!-- File Format Converter -->
@@ -444,8 +394,8 @@
               </div>
             </div>
 
-            <!-- TAB 3: DATE/TIME -->
-            <div class="tab-content" id="tab-3">
+            <!-- TAB 2: DATE/TIME -->
+            <div class="tab-content" id="tab-2">
               <p style="color: rgb(122, 122, 122); font-size: 12px; margin-bottom: 12px;">Date and time calculations.</p>
 
               <!-- Current Date/Time -->
@@ -497,49 +447,29 @@
   <script>
     // ------- TAB SYSTEM -------
     let activeTab = 0;
-    let editingTabIndex = -1;
 
     function switchTab(index) {
-      if (editingTabIndex !== -1) return; // Don't switch if editing
-      
-      document.querySelectorAll('.tab').forEach((t, i) => {
-        t.classList.toggle('active', i === index);
-      });
-      document.querySelectorAll('.tab-content').forEach((c, i) => {
-        c.classList.toggle('active', i === index);
-      });
-      activeTab = index;
-    }
-
-    function editTabName(index, event) {
-      event.stopPropagation();
-      if (editingTabIndex === index) return;
-      
-      editingTabIndex = index;
-      const label = event.target;
-      const input = document.getElementById(`tab-input-${index}`);
-      
-      label.classList.add('editing');
-      input.classList.add('visible');
-      input.focus();
-      input.select();
-
-      function finishEdit() {
-        if (editingTabIndex !== index) return;
-        editingTabIndex = -1;
-        label.classList.remove('editing');
-        input.classList.remove('visible');
-        label.textContent = input.value || label.textContent;
-      }
-
-      input.addEventListener('blur', finishEdit, { once: true });
-      input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') finishEdit();
-        if (e.key === 'Escape') {
-          input.value = label.textContent;
-          finishEdit();
+      // Update tab buttons
+      document.querySelectorAll('.tab').forEach((tab, i) => {
+        if (i === index) {
+          tab.classList.add('active');
+          tab.style.borderBottom = '2px solid rgb(100, 180, 255)';
+        } else {
+          tab.classList.remove('active');
+          tab.style.borderBottom = '1px solid var(--line, #3a3a3a)';
         }
-      }, { once: true });
+      });
+      
+      // Update tab contents
+      document.querySelectorAll('.tab-content').forEach((content, i) => {
+        if (i === index) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+      
+      activeTab = index;
     }
 
     // ------- CONVERSIONS -------
