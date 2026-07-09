@@ -1,1 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ENG // Utility Console</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { 
+      font-family: 'Space Mono', ui-monospace, monospace; 
+    }
+    .brd { 
+      border: 1px solid var(--line, #3a3a3a); 
+    }
+    .brd-b { 
+      border-bottom: 1px solid var(--line, #3a3a3a); 
+    }
+    :root { 
+      --line: #3a3a3a; 
+    }
+    
+    /* checkerboard transparency backdrop */
+    .transparent-mode {
+      background-color: #1a1a1a;
+      background-image:
+        linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
+        linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    }
+    
+    input, select, textarea, button { 
+      font-family: inherit; 
+    }
+    
+    select { 
+      -webkit-appearance: none; 
+      appearance: none; 
+    }
+    
+    button:focus-visible, a:focus-visible, input:focus-visible,
+    select:focus-visible, textarea:focus-visible {
+      outline: 2px solid #d4d4d4; 
+      outline-offset: 2px;
+    }
+    
+    .native-input:focus { 
+      outline: none; 
+      border-color: #d4d4d4; 
+    }
+    
+    textarea { 
+      resize: vertical; 
+    }
+    
+    .btn { 
+      transition: background-color .12s ease, color .12s ease; 
+    }
+  </style>
+</head>
 
+<body class="min-h-screen w-full" style="width: 100%; background: rgb(17, 17, 17); color: rgb(229, 229, 229);">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+    
+    <!-- HEADER -->
+    <header class="brd-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+      <div>
+        <h1 class="tracking-tight" style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 28px; letter-spacing: -0.02rem;">ENG // UTILITY CONSOLE</h1>
+        <p class="mt-1" style="color: rgb(138, 138, 138); font-weight: 400; font-style: normal; font-size: 13px;">internal image + data processing tool</p>
+      </div>
+      <div class="flex flex-col sm:items-end gap-2">
+        <div class="flex items-center gap-2">
+          <label for="user-initials" class="text-[11px] text-neutral-400" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 11px;">OPERATOR INITIALS</label>
+          <input id="user-initials" type="text" class="native-input brd bg-transparent px-2 py-1 text-[12px] w-20 text-neutral-200 text-center" maxlength="8" placeholder="ENG" style="color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 11px;">
+        </div>
+        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 12px;">build 1.0.0 // status: online</p>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- LEFT: IMAGE WORKFLOW -->
+      <section class="brd p-5">
+        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 01 ] IMAGE WORKFLOW</h2>
+        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 12px;">load, process, and export raster assets.</p>
+        
+        <!-- upload -->
+        <div class="mb-5">
+          <label for="file-input" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">SOURCE IMAGE</label>
+          <div class="flex flex-wrap items-center gap-3">
+            <input id="file-input" type="file" accept="image/*" class="sr-only">
+            <button type="button" class="btn brd px-4 py-2" onclick="document.getElementById('file-input').click()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">load image...</button>
+            <span id="file-name" class="text-[13px] text-neutral-500 truncate max-w-[180px]">no file</span>
+          </div>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">accepts png / jpeg / webp from local disk.</p>
+        </div>
+
+        <!-- preview -->
+        <div id="image-preview" class="brd flex items-center justify-center overflow-hidden mb-4" style="height:220px;">
+          <span class="px-4 text-center" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 12px;">[ no image loaded ]<br>select a file to preview</span>
+        </div>
+
+        <!-- remove bg -->
+        <div class="mb-5">
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="removeBackground()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">remove background</button>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">knocks out near-white pixels to transparency.</p>
+        </div>
+
+        <!-- resolution -->
+        <div class="mb-5">
+          <label for="res-select" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">OUTPUT RESOLUTION</label>
+          <select id="res-select" class="native-input brd bg-transparent px-3 py-2 w-full text-[14px] text-neutral-200">
+            <option value="640x480">640 x 480</option>
+            <option value="1280x720" selected="">1280 x 720</option>
+            <option value="1920x1080">1920 x 1080</option>
+            <option value="2560x1440">2560 x 1440</option>
+            <option value="3840x2160">3840 x 2160</option>
+          </select>
+        </div>
+
+        <!-- export -->
+        <div class="mb-4">
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('png')" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-style: normal; font-size: 13px;">download as png</button>
+            <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('jpeg')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">download as jpeg</button>
+          </div>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">png preserves transparency; jpeg flattens to white. opens browser save prompt where supported.</p>
+          <p class="mt-1 text-[11px] text-neutral-500" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 10px;">* Note: Standard browser downloads apply if native save picker is unsupported.</p>
+        </div>
+        
+        <p id="img-status" class="text-[13px] text-neutral-400 brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
+      </section>
+
+      <!-- RIGHT: DATA / EXPORT WORKFLOW -->
+      <section class="brd p-5">
+        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 02 ] DATA / EXPORT</h2>
+        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 12px;">edit structured rows and export as csv.</p>
+        
+        <div class="mb-3">
+          <label for="data-area" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">STRUCTURED DATA</label>
+          <textarea id="data-area" rows="10" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] leading-relaxed text-neutral-200" spellcheck="false" style="color: rgb(229, 229, 229); font-size: 13px;"></textarea>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">one row per line, comma-separated fields.</p>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mb-5">
+          <button type="button" class="btn brd px-4 py-2" onclick="addSampleRow()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">+ sample row</button>
+          <button type="button" class="btn brd px-4 py-2" onclick="clearData()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">clear buffer</button>
+        </div>
+
+        <div class="mb-4">
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="exportCsvSync()" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-style: normal; font-size: 13px;">download as csv</button>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">downloads a .csv file. opens browser save prompt where supported.</p>
+          <p class="mt-1 text-[11px] text-neutral-500" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 10px;">* Note: Standard browser downloads apply if native save picker is unsupported.</p>
+        </div>
+
+        <p id="data-status" class="text-[13px] text-neutral-400 brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-8 pt-5" style="border-top:1px solid var(--line);">
+      <p style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 11px;">ENG // UTILITY CONSOLE — no data leaves this session. all processing runs locally.</p>
+    </footer>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    // ------- state -------
+    let loadedImage = null;
+    let bgRemoved = false;
+
+    const imgStatus = document.getElementById('img-status');
+    const dataStatus = document.getElementById('data-status');
+    const preview = document.getElementById('image-preview');
+    const placeholder = preview.querySelector('span');
+
+    function setImgStatus(tag, msg) { imgStatus.textContent = '[ ' + tag + ' ] ' + msg; }
+    function setDataStatus(tag, msg) { dataStatus.textContent = '[ ' + tag + ' ] ' + msg; }
+
+    // ------- upload -------
+    document.getElementById('file-input').addEventListener('change', function (e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        setImgStatus('ERROR', 'file is not an image');
+        return;
+      }
+      document.getElementById('file-name').textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        const img = new Image();
+        img.onload = function () {
+          loadedImage = img;
+          bgRemoved = false;
+          renderPreview(img);
+          setImgStatus('OK', 'image loaded ' + img.naturalWidth + 'x' + img.naturalHeight);
+        };
+        img.onerror = function () { setImgStatus('ERROR', 'could not decode image'); };
+        img.src = ev.target.result;
+      };
+      reader.onerror = function () { setImgStatus('ERROR', 'read failed'); };
+      reader.readAsDataURL(file);
+    });
+
+    function renderPreview(img) {
+      if (placeholder) placeholder.style.display = 'none';
+      let existing = preview.querySelector('img.preview-img');
+      if (!existing) {
+        existing = document.createElement('img');
+        existing.className = 'preview-img';
+        existing.style.maxWidth = '100%';
+        existing.style.maxHeight = '100%';
+        existing.style.objectFit = 'contain';
+        preview.appendChild(existing);
+      }
+      existing.src = img.src;
+    }
+
+    // ------- remove background (simple near-white knockout) -------
+    function removeBackground() {
+      if (!loadedImage) { setImgStatus('ERROR', 'no image loaded'); return; }
+      setImgStatus('BUSY', 'processing...');
+      setTimeout(function () {
+        try {
+          const c = document.createElement('canvas');
+          c.width = loadedImage.naturalWidth;
+          c.height = loadedImage.naturalHeight;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(loadedImage, 0, 0);
+          const data = ctx.getImageData(0, 0, c.width, c.height);
+          const d = data.data;
+          const T = 235;
+          for (let i = 0; i < d.length; i += 4) {
+            if (d[i] >= T && d[i + 1] >= T && d[i + 2] >= T) d[i + 3] = 0;
+          }
+          ctx.putImageData(data, 0, 0);
+          const out = new Image();
+          out.onload = function () {
+            loadedImage = out;
+            bgRemoved = true;
+            preview.classList.add('transparent-mode');
+            renderPreview(out);
+            setImgStatus('OK', 'background removed (transparent PNG-ready)');
+          };
+          out.src = c.toDataURL('image/png');
+        } catch (err) {
+          setImgStatus('ERROR', 'processing failed');
+        }
+      }, 30);
+    }
+
+    // ------- export image -------
+    async function triggerSaveFile(blob, suggestedName, mimeType) {
+      if (window.showSaveFilePicker) {
+        try {
+          const options = {
+            suggestedName: suggestedName,
+            types: [{
+              description: mimeType === 'text/csv' ? 'CSV File' : mimeType === 'image/png' ? 'PNG Image' : 'JPEG Image',
+              accept: { [mimeType]: [mimeType === 'text/csv' ? '.csv' : mimeType === 'image/png' ? '.png' : '.jpeg', mimeType === 'image/jpeg' ? '.jpg' : ''] }
+            }]
+          };
+          const handle = await window.showSaveFilePicker(options);
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return true;
+        } catch (err) {
+          if (err.name === 'AbortError') {
+            throw new Error('Save cancelled by user');
+          }
+          console.warn('Native save failed, falling back:', err);
+        }
+      }
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = suggestedName;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      return false;
+    }
+
+    function getInitials() {
+      const input = document.getElementById('user-initials');
+      return (input && input.value.trim()) ? input.value.trim().toUpperCase() : '';
+    }
+
+    function exportImageSync(fmt) {
+      if (!loadedImage) { setImgStatus('ERROR', 'no image to export'); return; }
+      const res = document.getElementById('res-select').value.split('x');
+      const W = parseInt(res[0], 10), H = parseInt(res[1], 10);
+      const c = document.createElement('canvas');
+      c.width = W; c.height = H;
+      const ctx = c.getContext('2d');
+      if (fmt === 'jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); }
+      
+      const ir = loadedImage.naturalWidth / loadedImage.naturalHeight;
+      const cr = W / H;
+      let dw, dh;
+      if (ir > cr) { dw = W; dh = W / ir; } else { dh = H; dw = H * ir; }
+      ctx.drawImage(loadedImage, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+      
+      setImgStatus('BUSY', 'exporting file...');
+      
+      try {
+        const initials = getInitials();
+        const prefix = initials ? initials + '_' : '';
+        const filename = prefix + 'export_' + W + 'x' + H + '.' + fmt;
+        
+        c.toBlob(async function (blob) {
+          if (!blob) {
+            setImgStatus('ERROR', 'failed to generate blob');
+            return;
+          }
+          
+          try {
+            const usedPicker = await triggerSaveFile(blob, filename, mime);
+            const userTag = initials ? ' [' + initials + ']' : '';
+            if (usedPicker) {
+              setImgStatus('OK', 'saved as ' + filename + userTag);
+            } else {
+              setImgStatus('OK', 'download started: ' + filename + userTag + ' (check downloads folder)');
+            }
+          } catch (err) {
+            setImgStatus('ERROR', err.message || 'save blocked (allow downloads for this site)');
+          }
+        }, mime, fmt === 'jpeg' ? 0.92 : undefined);
+      } catch (err) {
+        setImgStatus('ERROR', 'canvas export failed');
+      }
+    }
+
+    // ------- data / csv -------
+    const area = document.getElementById('data-area');
+    let sampleN = 0;
+
+    function addSampleRow() {
+      sampleN += 1;
+      const id = String(1000 + sampleN);
+      const line = 'ITEM-' + id + ',component_' + sampleN + ',OK,' + (Math.round(Math.random() * 900) / 10);
+      area.value = (area.value ? area.value.replace(/\s*$/, '') + '\n' : '') + line;
+      setDataStatus('OK', 'row appended (' + area.value.split('\n').filter(Boolean).length + ' rows)');
+    }
+
+    function clearData() {
+      area.value = '';
+      setDataStatus('OK', 'buffer cleared');
+    }
+
+    function exportCsvSync() {
+      const raw = area.value.trim();
+      if (!raw) { setDataStatus('ERROR', 'no data to export'); return; }
+      const lines = raw.split(/\r?\n/).filter(function (l) { return l.trim() !== ''; });
+      const csv = lines.map(function (line) {
+        const cells = line.split(',').map(function (cell) {
+          const v = cell.trim();
+          if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+          return v;
+        });
+        return cells.join(',');
+      }).join('\r\n');
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const initials = getInitials();
+      const prefix = initials ? initials + '_' : '';
+      const filename = prefix + 'data_export.csv';
+      
+      setDataStatus('BUSY', 'exporting csv...');
+      
+      triggerSaveFile(blob, filename, 'text/csv').then(function(usedPicker) {
+        const userTag = initials ? ' [' + initials + ']' : '';
+        if (usedPicker) {
+          setDataStatus('OK', 'saved as ' + filename + userTag);
+        } else {
+          setDataStatus('OK', 'download started: ' + filename + userTag + ' (check downloads folder)');
+        }
+      }).catch(function(err) {
+        setDataStatus('ERROR', err.message || 'save blocked (allow downloads for this site)');
+      });
+    }
+
+    // Initialize data area with sample data
+    document.addEventListener('DOMContentLoaded', function() {
+      area.value = "id,name,status,value\nITEM-1001,sensor_a,OK,42.5\nITEM-1002,sensor_b,FAIL,0.0";
+    });
+  </script>
+</body>
+</html>
