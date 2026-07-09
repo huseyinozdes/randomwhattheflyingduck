@@ -65,129 +65,11 @@
     .btn { 
       transition: background-color .12s ease, color .12s ease; 
     }
-
-    /* Tab System */
-    .tab-bar {
-      display: flex;
-      gap: 2px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid var(--line, #3a3a3a);
-    }
-
-    .tab {
-      padding: 6px 12px;
-      border: 1px solid var(--line, #3a3a3a);
-      background: rgb(22, 22, 22);
-      color: rgb(138, 138, 138);
-      cursor: pointer;
-      transition: all 0.12s ease;
-      font-size: 11px;
-      font-weight: 400;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    .tab:hover {
-      background: rgb(28, 28, 28);
-      color: rgb(189, 189, 189);
-    }
-
-    .tab.active {
-      background: rgb(40, 40, 40);
-      color: rgb(100, 180, 255);
-      font-weight: 700;
-      border-bottom: 2px solid rgb(100, 180, 255);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Bidirectional converter */
-    .converter-pair {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 8px;
-      align-items: flex-end;
-      margin-bottom: 12px;
-    }
-
-    .converter-input {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .converter-swap {
-      padding: 6px 10px;
-      background: rgb(28, 28, 28);
-      border: 1px solid var(--line, #3a3a3a);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      color: rgb(189, 189, 189);
-      transition: background-color 0.12s ease;
-    }
-
-    .converter-swap:hover {
-      background: rgb(40, 40, 40);
-      color: rgb(100, 180, 255);
-    }
-
-    .cad-preview {
-      background: rgb(22, 22, 22);
-      border: 1px solid var(--line, #3a3a3a);
-      padding: 12px;
-      border-radius: 2px;
-      font-size: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-      color: rgb(138, 138, 138);
-      line-height: 1.5;
-    }
-
-    .cad-info-section {
-      margin-bottom: 10px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgb(40, 40, 40);
-    }
-
-    .cad-info-section:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .cad-info-title {
-      font-weight: 700;
-      color: rgb(189, 189, 189);
-      font-size: 10px;
-      margin-bottom: 4px;
-      text-transform: uppercase;
-    }
-
-    .cad-info-text {
-      font-size: 10px;
-      color: rgb(122, 122, 122);
-      line-height: 1.4;
-    }
-
-    .cad-warning {
-      font-size: 10px;
-      color: rgb(200, 150, 80);
-      margin-top: 3px;
-      line-height: 1.3;
-    }
   </style>
 </head>
 
-<body class="min-h-screen w-full flex flex-col" style="width: 100%; background: rgb(17, 17, 17); color: rgb(229, 229, 229);">
-  <div class="flex-1 flex flex-col max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full">
+<body class="min-h-screen w-full" style="width: 100%; background: rgb(17, 17, 17); color: rgb(229, 229, 229);">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
     
     <!-- HEADER -->
     <header class="brd-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
@@ -198,243 +80,91 @@
       <div class="flex flex-col sm:items-end gap-2">
         <div class="flex items-center gap-2">
           <label for="user-initials" class="text-[11px] text-neutral-400" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 11px;">OPERATOR INITIALS</label>
-          <input id="user-initials" type="text" class="native-input brd bg-transparent px-2 py-1 text-[12px] w-20 text-neutral-200 text-center" maxlength="8" placeholder="ENG" style="color: rgb(229, 229, 229);">
+          <input id="user-initials" type="text" class="native-input brd bg-transparent px-2 py-1 text-[12px] w-20 text-neutral-200 text-center" maxlength="8" placeholder="ENG" style="color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 11px;">
         </div>
-        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 12px;">build 1.3.1 // status: online</p>
+        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 12px;">build 1.0.0 // status: online</p>
       </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- MAIN -->
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
-      <!-- LEFT COLUMN: IMAGE + DATA -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- IMAGE WORKFLOW -->
-        <section class="brd p-5">
-          <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 01 ] IMAGE WORKFLOW</h2>
-          <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 12px;">load, process, and export raster assets.</p>
-          
-          <!-- upload -->
-          <div class="mb-5">
-            <label for="file-input" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">SOURCE IMAGE</label>
-            <div class="flex flex-wrap items-center gap-3">
-              <input id="file-input" type="file" accept="image/*" class="sr-only">
-              <button type="button" class="btn brd px-4 py-2" onclick="document.getElementById('file-input').click()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 12px;">UPLOAD</button>
-              <span id="file-name" class="text-[13px] text-neutral-500 truncate max-w-[180px]">no file</span>
-            </div>
-            <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">accepts png / jpeg / webp from local disk.</p>
+      <!-- LEFT: IMAGE WORKFLOW -->
+      <section class="brd p-5">
+        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 01 ] IMAGE WORKFLOW</h2>
+        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 12px;">load, process, and export raster assets.</p>
+        
+        <!-- upload -->
+        <div class="mb-5">
+          <label for="file-input" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">SOURCE IMAGE</label>
+          <div class="flex flex-wrap items-center gap-3">
+            <input id="file-input" type="file" accept="image/*" class="sr-only">
+            <button type="button" class="btn brd px-4 py-2" onclick="document.getElementById('file-input').click()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">load image...</button>
+            <span id="file-name" class="text-[13px] text-neutral-500 truncate max-w-[180px]">no file</span>
           </div>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">accepts png / jpeg / webp from local disk.</p>
+        </div>
 
-          <!-- preview -->
-          <div id="image-preview" class="brd flex items-center justify-center overflow-hidden mb-4" style="height:220px;">
-            <span class="px-4 text-center" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 12px;">[ no image loaded ]<br>select a file to preview</span>
+        <!-- preview -->
+        <div id="image-preview" class="brd flex items-center justify-center overflow-hidden mb-4" style="height:220px;">
+          <span class="px-4 text-center" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 12px;">[ no image loaded ]<br>select a file to preview</span>
+        </div>
+
+        <!-- remove bg -->
+        <div class="mb-5">
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="removeBackground()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">remove background</button>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">knocks out near-white pixels to transparency.</p>
+        </div>
+
+        <!-- resolution -->
+        <div class="mb-5">
+          <label for="res-select" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">OUTPUT RESOLUTION</label>
+          <select id="res-select" class="native-input brd bg-transparent px-3 py-2 w-full text-[14px] text-neutral-200">
+            <option value="640x480">640 x 480</option>
+            <option value="1280x720" selected="">1280 x 720</option>
+            <option value="1920x1080">1920 x 1080</option>
+            <option value="2560x1440">2560 x 1440</option>
+            <option value="3840x2160">3840 x 2160</option>
+          </select>
+        </div>
+
+        <!-- export -->
+        <div class="mb-4">
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('png')" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-style: normal; font-size: 13px;">download as png</button>
+            <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('jpeg')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">download as jpeg</button>
           </div>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">png preserves transparency; jpeg flattens to white. opens browser save prompt where supported.</p>
+          <p class="mt-1 text-[11px] text-neutral-500" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 10px;">* Note: Standard browser downloads apply if native save picker is unsupported.</p>
+        </div>
+        
+        <p id="img-status" class="text-[13px] text-neutral-400 brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
+      </section>
 
-          <!-- remove bg -->
-          <div class="mb-5">
-            <button type="button" class="btn brd px-4 py-2 w-full" onclick="removeBackground()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 12px;">REMOVE BACKGROUND</button>
-            <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">knocks out near-white pixels to transparency.</p>
-          </div>
+      <!-- RIGHT: DATA / EXPORT WORKFLOW -->
+      <section class="brd p-5">
+        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 02 ] DATA / EXPORT</h2>
+        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 12px;">edit structured rows and export as csv.</p>
+        
+        <div class="mb-3">
+          <label for="data-area" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">STRUCTURED DATA</label>
+          <textarea id="data-area" rows="10" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] leading-relaxed text-neutral-200" spellcheck="false" style="color: rgb(229, 229, 229); font-size: 13px;"></textarea>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">one row per line, comma-separated fields.</p>
+        </div>
 
-          <!-- resolution -->
-          <div class="mb-5">
-            <label for="res-select" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">OUTPUT RESOLUTION</label>
-            <select id="res-select" class="native-input brd bg-transparent px-3 py-2 w-full text-[14px] text-neutral-200">
-              <option value="640x480">640 x 480</option>
-              <option value="1280x720" selected="">1280 x 720</option>
-              <option value="1920x1080">1920 x 1080</option>
-              <option value="2560x1440">2560 x 1440</option>
-              <option value="3840x2160">3840 x 2160</option>
-            </select>
-          </div>
+        <div class="flex flex-wrap gap-3 mb-5">
+          <button type="button" class="btn brd px-4 py-2" onclick="addSampleRow()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">+ sample row</button>
+          <button type="button" class="btn brd px-4 py-2" onclick="clearData()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 13px;">clear buffer</button>
+        </div>
 
-          <!-- export -->
-          <div class="mb-4">
-            <div class="grid grid-cols-2 gap-3">
-              <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('png')" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-style: normal; font-size: 12px;">EXPORT PNG</button>
-              <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('jpeg')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 12px;">EXPORT JPEG</button>
-            </div>
-            <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">png preserves transparency; jpeg flattens to white.</p>
-          </div>
-          
-          <p id="img-status" class="text-[13px] text-neutral-400 brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
-        </section>
+        <div class="mb-4">
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="exportCsvSync()" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-style: normal; font-size: 13px;">download as csv</button>
+          <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">downloads a .csv file. opens browser save prompt where supported.</p>
+          <p class="mt-1 text-[11px] text-neutral-500" style="color: rgb(90, 90, 90); font-weight: 400; font-style: normal; font-size: 10px;">* Note: Standard browser downloads apply if native save picker is unsupported.</p>
+        </div>
 
-        <!-- DATA / EXPORT WORKFLOW -->
-        <section class="brd p-5">
-          <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 02 ] DATA / EXPORT</h2>
-          <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-weight: 400; font-style: normal; font-size: 12px;">edit structured rows and export as csv.</p>
-          
-          <div class="mb-3">
-            <label for="data-area" class="block mb-2" style="color: rgb(189, 189, 189); font-weight: 400; font-style: normal; font-size: 12px;">STRUCTURED DATA</label>
-            <textarea id="data-area" rows="8" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] leading-relaxed text-neutral-200" spellcheck="false" style="color: rgb(229, 229, 229);"></textarea>
-            <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">one row per line, comma-separated fields.</p>
-          </div>
-
-          <div class="flex flex-wrap gap-3 mb-5">
-            <button type="button" class="btn brd px-4 py-2" onclick="addSampleRow()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 12px;">+ SAMPLE ROW</button>
-            <button type="button" class="btn brd px-4 py-2" onclick="clearData()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-style: normal; font-size: 12px;">CLEAR</button>
-          </div>
-
-          <div class="mb-4">
-            <button type="button" class="btn brd px-4 py-2 w-full" onclick="exportCsvSync()" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-style: normal; font-size: 12px;">EXPORT CSV</button>
-            <p class="mt-2" style="color: rgb(106, 106, 106); font-weight: 400; font-style: normal; font-size: 11px;">downloads a .csv file with proper escaping.</p>
-          </div>
-
-          <p id="data-status" class="text-[13px] text-neutral-400 brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
-        </section>
-      </div>
-
-      <!-- RIGHT COLUMN: TABBED TOOLS -->
-      <div class="lg:col-span-1">
-        <section class="brd p-5 h-full flex flex-col">
-          <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-style: normal; font-size: 15px;">[ 03 ] TOOLS</h2>
-          
-          <!-- Tab Bar -->
-          <div class="tab-bar">
-            <button class="tab active" onclick="switchTab(0)" style="border-bottom: 2px solid rgb(100, 180, 255);">CONVERT</button>
-            <button class="tab" onclick="switchTab(1)">CAD</button>
-            <button class="tab" onclick="switchTab(2)">DATE</button>
-          </div>
-
-          <!-- Tab Contents -->
-          <div class="flex-1 overflow-y-auto">
-
-            <!-- TAB 0: CONVERSIONS -->
-            <div class="tab-content active" id="tab-0">
-              <p style="color: rgb(122, 122, 122); font-size: 12px; margin-bottom: 12px;">Bidirectional engineering unit conversions.</p>
-
-              <!-- Length: Inches <-> Millimeters -->
-              <div class="converter-pair">
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">INCHES</label>
-                  <input type="number" id="conv-in" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('in')" step="0.001" style="color: rgb(229, 229, 229);">
-                </div>
-                <button class="converter-swap" onclick="swapConversion('length')">↔</button>
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">MM</label>
-                  <input type="number" id="conv-mm" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('mm')" step="0.001" style="color: rgb(229, 229, 229);">
-                </div>
-              </div>
-
-              <!-- Length: Feet <-> Meters -->
-              <div class="converter-pair">
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">FEET</label>
-                  <input type="number" id="conv-ft" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('ft')" step="0.01" style="color: rgb(229, 229, 229);">
-                </div>
-                <button class="converter-swap" onclick="swapConversion('feet-m')">↔</button>
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">METERS</label>
-                  <input type="number" id="conv-m" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('m')" step="0.01" style="color: rgb(229, 229, 229);">
-                </div>
-              </div>
-
-              <!-- Temperature: Celsius <-> Fahrenheit -->
-              <div class="converter-pair">
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">CELSIUS</label>
-                  <input type="number" id="conv-c" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertTemp('c')" step="0.1" style="color: rgb(229, 229, 229);">
-                </div>
-                <button class="converter-swap" onclick="swapConversion('temp')">↔</button>
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">FAHRENHEIT</label>
-                  <input type="number" id="conv-f" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertTemp('f')" step="0.1" style="color: rgb(229, 229, 229);">
-                </div>
-              </div>
-
-              <!-- Weight: Pounds <-> Kilograms -->
-              <div class="converter-pair">
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">POUNDS</label>
-                  <input type="number" id="conv-lb" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertWeight('lb')" step="0.01" style="color: rgb(229, 229, 229);">
-                </div>
-                <button class="converter-swap" onclick="swapConversion('weight')">↔</button>
-                <div class="converter-input">
-                  <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">KILOGRAMS</label>
-                  <input type="number" id="conv-kg" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertWeight('kg')" step="0.01" style="color: rgb(229, 229, 229);">
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB 1: CAD -->
-            <div class="tab-content" id="tab-1">
-              <p style="color: rgb(122, 122, 122); font-size: 12px; margin-bottom: 12px;">CAD format conversions & compression info.</p>
-
-              <!-- File Format Converter -->
-              <div class="mb-5">
-                <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">FORMAT CONVERSION</label>
-                <select id="cad-from-format" class="native-input brd bg-transparent px-3 py-2 w-full text-[12px] text-neutral-200" onchange="updateCadConversion()">
-                  <option value="dwg">DWG (AutoCAD)</option>
-                  <option value="dxf">DXF (Drawing Exchange)</option>
-                  <option value="step">STEP (3D Model)</option>
-                  <option value="iges">IGES (3D Model)</option>
-                  <option value="stl">STL (3D Print)</option>
-                  <option value="obj">OBJ (3D Model)</option>
-                </select>
-              </div>
-
-              <div id="cad-conversion-info" class="cad-preview" style="margin-bottom: 12px;">
-                <!-- Filled by JavaScript -->
-              </div>
-
-              <!-- Compression Options -->
-              <div class="mb-5">
-                <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">COMPRESSION</label>
-                <div style="display: flex; gap: 3px; flex-wrap: wrap;">
-                  <button type="button" class="btn brd px-3 py-1" onclick="selectCompression('none')" id="cad-comp-none" style="background: rgb(40, 40, 40); color: rgb(100, 180, 255); font-weight: 700; font-size: 10px;">NONE</button>
-                  <button type="button" class="btn brd px-3 py-1" onclick="selectCompression('low')" id="cad-comp-low" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-size: 10px;">LOW</button>
-                  <button type="button" class="btn brd px-3 py-1" onclick="selectCompression('med')" id="cad-comp-med" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-size: 10px;">MED</button>
-                  <button type="button" class="btn brd px-3 py-1" onclick="selectCompression('high')" id="cad-comp-high" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-weight: 400; font-size: 10px;">HIGH</button>
-                </div>
-              </div>
-
-              <div id="cad-compression-info" class="cad-preview">
-                <!-- Filled by JavaScript -->
-              </div>
-            </div>
-
-            <!-- TAB 2: DATE/TIME -->
-            <div class="tab-content" id="tab-2">
-              <p style="color: rgb(122, 122, 122); font-size: 12px; margin-bottom: 12px;">Date and time calculations.</p>
-
-              <!-- Current Date/Time -->
-              <div class="mb-5">
-                <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">CURRENT DATE</label>
-                <div class="brd bg-transparent px-3 py-2" style="color: rgb(100, 180, 255); font-size: 12px; font-weight: 700;">
-                  <div id="current-date-display"></div>
-                  <div id="current-time-display" style="font-size: 11px; color: rgb(189, 189, 189); margin-top: 4px;"></div>
-                </div>
-              </div>
-
-              <!-- Days Between -->
-              <div class="mb-5">
-                <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">DAYS BETWEEN</label>
-                <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px;">
-                  <input type="date" id="date-from" class="native-input brd bg-transparent px-2 py-2 text-[12px]" style="color: rgb(229, 229, 229);" oninput="calculateDaysBetween()">
-                  <input type="date" id="date-to" class="native-input brd bg-transparent px-2 py-2 text-[12px]" style="color: rgb(229, 229, 229);" oninput="calculateDaysBetween()">
-                </div>
-                <div id="days-result" class="brd px-3 py-2" style="background: rgb(22, 22, 22); color: rgb(138, 138, 138); font-size: 12px;">
-                  <p style="color: rgb(90, 90, 90);">select two dates</p>
-                </div>
-              </div>
-
-              <!-- Add Days -->
-              <div>
-                <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">ADD/SUBTRACT DAYS</label>
-                <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                  <input type="date" id="date-base" class="native-input brd bg-transparent px-2 py-2 text-[12px] flex-1" style="color: rgb(229, 229, 229);">
-                  <input type="number" id="days-offset" class="native-input brd bg-transparent px-2 py-2 text-[12px] w-16" placeholder="0" style="color: rgb(229, 229, 229);" oninput="addDaysToDate()">
-                </div>
-                <div id="offset-result" class="brd px-3 py-2" style="background: rgb(22, 22, 22); color: rgb(138, 138, 138); font-size: 12px;">
-                  <p style="color: rgb(90, 90, 90);">select date</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-      </div>
+        <p id="data-status" class="text-[13px] text-neutral-400 brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
+      </section>
     </main>
 
     <!-- FOOTER -->
@@ -445,300 +175,7 @@
 
   <!-- Application Logic -->
   <script>
-    // ------- TAB SYSTEM -------
-    let activeTab = 0;
-
-    function switchTab(index) {
-      // Update tab buttons
-      document.querySelectorAll('.tab').forEach((tab, i) => {
-        if (i === index) {
-          tab.classList.add('active');
-          tab.style.borderBottom = '2px solid rgb(100, 180, 255)';
-        } else {
-          tab.classList.remove('active');
-          tab.style.borderBottom = '1px solid var(--line, #3a3a3a)';
-        }
-      });
-      
-      // Update tab contents
-      document.querySelectorAll('.tab-content').forEach((content, i) => {
-        if (i === index) {
-          content.classList.add('active');
-        } else {
-          content.classList.remove('active');
-        }
-      });
-      
-      activeTab = index;
-    }
-
-    // ------- CONVERSIONS -------
-    function convertLength(source) {
-      const in_val = parseFloat(document.getElementById('conv-in').value) || 0;
-      const mm_val = parseFloat(document.getElementById('conv-mm').value) || 0;
-      const ft_val = parseFloat(document.getElementById('conv-ft').value) || 0;
-      const m_val = parseFloat(document.getElementById('conv-m').value) || 0;
-
-      if (source === 'in') {
-        document.getElementById('conv-mm').value = (in_val * 25.4).toFixed(3);
-      } else if (source === 'mm') {
-        document.getElementById('conv-in').value = (mm_val / 25.4).toFixed(4);
-      } else if (source === 'ft') {
-        document.getElementById('conv-m').value = (ft_val * 0.3048).toFixed(4);
-      } else if (source === 'm') {
-        document.getElementById('conv-ft').value = (m_val / 0.3048).toFixed(4);
-      }
-    }
-
-    function convertTemp(source) {
-      const c_val = parseFloat(document.getElementById('conv-c').value);
-      const f_val = parseFloat(document.getElementById('conv-f').value);
-
-      if (source === 'c' && !isNaN(c_val)) {
-        document.getElementById('conv-f').value = ((c_val * 9/5) + 32).toFixed(2);
-      } else if (source === 'f' && !isNaN(f_val)) {
-        document.getElementById('conv-c').value = ((f_val - 32) * 5/9).toFixed(2);
-      }
-    }
-
-    function convertWeight(source) {
-      const lb_val = parseFloat(document.getElementById('conv-lb').value) || 0;
-      const kg_val = parseFloat(document.getElementById('conv-kg').value) || 0;
-
-      if (source === 'lb') {
-        document.getElementById('conv-kg').value = (lb_val * 0.453592).toFixed(3);
-      } else if (source === 'kg') {
-        document.getElementById('conv-lb').value = (kg_val / 0.453592).toFixed(3);
-      }
-    }
-
-    function swapConversion(type) {
-      if (type === 'length') {
-        const in_val = document.getElementById('conv-in').value;
-        const mm_val = document.getElementById('conv-mm').value;
-        document.getElementById('conv-in').value = mm_val;
-        document.getElementById('conv-mm').value = in_val;
-      } else if (type === 'feet-m') {
-        const ft_val = document.getElementById('conv-ft').value;
-        const m_val = document.getElementById('conv-m').value;
-        document.getElementById('conv-ft').value = m_val;
-        document.getElementById('conv-m').value = ft_val;
-      } else if (type === 'temp') {
-        const c_val = document.getElementById('conv-c').value;
-        const f_val = document.getElementById('conv-f').value;
-        document.getElementById('conv-c').value = f_val;
-        document.getElementById('conv-f').value = c_val;
-      } else if (type === 'weight') {
-        const lb_val = document.getElementById('conv-lb').value;
-        const kg_val = document.getElementById('conv-kg').value;
-        document.getElementById('conv-lb').value = kg_val;
-        document.getElementById('conv-kg').value = lb_val;
-      }
-    }
-
-    // ------- CAD TOOLS -------
-    let selectedCompression = 'none';
-
-    const cadConversionData = {
-      'dwg': {
-        name: 'DWG (AutoCAD)',
-        supported: ['DXF', 'PDF', 'DWF'],
-        dataLoss: {
-          'dxf': { loss: 'minimal', note: 'Most 2D geometry preserved. Some AutoCAD-specific properties may not transfer.' },
-          'pdf': { loss: 'lossy', note: 'Rasterized output. All geometry converted to image. Not editable.' },
-          'dwf': { loss: 'minimal', note: 'Format designed for sharing. Geometry preserved, editing limited.' }
-        }
-      },
-      'dxf': {
-        name: 'DXF (Drawing Exchange)',
-        supported: ['DWG', 'PDF', 'SVG'],
-        dataLoss: {
-          'dwg': { loss: 'minimal', note: 'Full conversion possible. Some extended DWG features may not be included.' },
-          'pdf': { loss: 'lossy', note: 'Converts to raster/static image. Vector data frozen.' },
-          'svg': { loss: 'moderate', note: '2D vectors preserved. 3D data, layers, and advanced attributes lost.' }
-        }
-      },
-      'step': {
-        name: 'STEP (3D Model)',
-        supported: ['IGES', 'STL', 'OBJ'],
-        dataLoss: {
-          'iges': { loss: 'minimal', note: 'Both are NURBS-based. Full geometry and surface data preserved.' },
-          'stl': { loss: 'major', note: 'Triangulation only. All curvature detail lost. Geometry becomes faceted approximation.' },
-          'obj': { loss: 'major', note: 'Converts to triangle mesh. No assembly/hierarchy preserved. Precision reduced.' }
-        }
-      },
-      'iges': {
-        name: 'IGES (3D Model)',
-        supported: ['STEP', 'STL', 'OBJ'],
-        dataLoss: {
-          'step': { loss: 'minimal', note: 'Both support NURBS surfaces. Most data transfers cleanly.' },
-          'stl': { loss: 'major', note: 'Mesh conversion required. Fine curves become polygons. Detail loss significant.' },
-          'obj': { loss: 'major', note: 'Converted to polygonal mesh. No surface information. Color/texture support limited.' }
-        }
-      },
-      'stl': {
-        name: 'STL (3D Print)',
-        supported: ['OBJ', 'PLY', '3MF'],
-        dataLoss: {
-          'obj': { loss: 'minimal', note: 'Both are mesh formats. Direct conversion possible. Color support may vary.' },
-          'ply': { loss: 'minimal', note: 'Compatible formats. Can preserve vertex colors/normals if present.' },
-          '3mf': { loss: 'minimal', note: 'Both designed for 3D printing. Geometry transfers well. Material data optional.' }
-        }
-      },
-      'obj': {
-        name: 'OBJ (3D Model)',
-        supported: ['STL', 'PLY', 'FBX'],
-        dataLoss: {
-          'stl': { loss: 'minimal', note: 'Both use triangle meshes. Conversion direct. Material info discarded in STL.' },
-          'ply': { loss: 'minimal', note: 'Can preserve vertex data. Extended attributes depend on PLY variant.' },
-          'fbx': { loss: 'minimal', note: 'FBX is more comprehensive. Can add rigging/animation data but OBJ does not include these.' }
-        }
-      }
-    };
-
-    function updateCadConversion() {
-      const format = document.getElementById('cad-from-format').value;
-      const info = document.getElementById('cad-conversion-info');
-      const data = cadConversionData[format];
-      
-      if (!data) {
-        info.innerHTML = '<p style="font-size: 11px;">Format info unavailable.</p>';
-        return;
-      }
-
-      let html = `<div class="cad-info-section">
-        <div class="cad-info-title">FROM: ${data.name}</div>
-        <div class="cad-info-text">Supported target formats:</div>`;
-      
-      data.supported.forEach(fmt => {
-        const targetLoss = data.dataLoss[fmt.toLowerCase()];
-        if (targetLoss) {
-          const lossColor = targetLoss.loss === 'minimal' ? 'rgb(100, 180, 100)' : 
-                           targetLoss.loss === 'moderate' ? 'rgb(200, 150, 80)' : 'rgb(180, 100, 100)';
-          html += `<div style="font-size: 9px; margin-top: 4px; padding: 3px; border-left: 2px solid ${lossColor}; padding-left: 6px;">
-            <span style="color: ${lossColor}; font-weight: 700; text-transform: uppercase;">${targetLoss.loss}</span>
-            <div style="font-size: 9px; color: rgb(122, 122, 122); margin-top: 1px;">${targetLoss.note}</div>
-          </div>`;
-        }
-      });
-      
-      html += '</div>';
-      info.innerHTML = html;
-    }
-
-    function selectCompression(level) {
-      selectedCompression = level;
-      document.querySelectorAll('[id^="cad-comp-"]').forEach(btn => {
-        btn.style.background = 'rgb(28, 28, 28)';
-        btn.style.color = 'rgb(229, 229, 229)';
-        btn.style.fontWeight = '400';
-      });
-      document.getElementById(`cad-comp-${level}`).style.background = 'rgb(40, 40, 40)';
-      document.getElementById(`cad-comp-${level}`).style.color = 'rgb(100, 180, 255)';
-      document.getElementById(`cad-comp-${level}`).style.fontWeight = '700';
-
-      const compressionData = {
-        'none': {
-          title: 'NONE',
-          reduction: 'Original file size maintained.',
-          details: 'No compression applied. Best for archival or when maximum precision is required. Recommended when file transfer is not limited.',
-          warnings: []
-        },
-        'low': {
-          title: 'LOW',
-          reduction: '~10-15% reduction',
-          details: 'Minimal compression. Slight mesh decimation (0.5-1mm tolerance). Suitable for iterative design work.',
-          warnings: [
-            'Small detail features may become less defined',
-            'Recommended tolerance check before final print'
-          ]
-        },
-        'med': {
-          title: 'MEDIUM',
-          reduction: '~30-40% reduction',
-          details: 'Moderate mesh simplification (1-2mm tolerance). Good for general manufacturing and prototyping.',
-          warnings: [
-            'Noticeable smoothing on curved surfaces',
-            'Fine edges and sharp corners become slightly rounded',
-            'Verify critical dimensions after conversion'
-          ]
-        },
-        'high': {
-          title: 'HIGH',
-          reduction: '~50-70% reduction',
-          details: 'Aggressive simplification (2-5mm tolerance). For concept preview only or large-scale parts.',
-          warnings: [
-            'Significant geometric deviation from original',
-            'Sharp features and small details removed',
-            'NOT recommended for precision manufacturing',
-            'Use only for visualization or rapid prototyping'
-          ]
-        }
-      };
-
-      const comp = compressionData[level];
-      let html = `<div class="cad-info-section">
-        <div class="cad-info-title">${comp.title}</div>
-        <div class="cad-info-text">${comp.reduction}</div>
-        <div class="cad-info-text" style="margin-top: 4px;">${comp.details}</div>`;
-
-      if (comp.warnings.length > 0) {
-        html += '<div style="margin-top: 6px;">';
-        comp.warnings.forEach(warning => {
-          html += `<div class="cad-warning">• ${warning}</div>`;
-        });
-        html += '</div>';
-      }
-
-      html += '</div>';
-      document.getElementById('cad-compression-info').innerHTML = html;
-    }
-
-    // ------- DATE/TIME TOOLS -------
-    function updateCurrentDate() {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
-      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      
-      document.getElementById('current-date-display').textContent = dateStr;
-      document.getElementById('current-time-display').textContent = timeStr;
-    }
-
-    function calculateDaysBetween() {
-      const from = document.getElementById('date-from').value;
-      const to = document.getElementById('date-to').value;
-      const result = document.getElementById('days-result');
-
-      if (!from || !to) {
-        result.innerHTML = '<p style="color: rgb(90, 90, 90);">select two dates</p>';
-        return;
-      }
-
-      const d1 = new Date(from);
-      const d2 = new Date(to);
-      const days = Math.abs(Math.floor((d2 - d1) / (1000 * 60 * 60 * 24))));
-
-      result.innerHTML = `<p style="color: rgb(100, 180, 255); font-weight: 700;">${days} days</p><p style="font-size: 10px; color: rgb(122, 122, 122); margin-top: 4px;">between dates</p>`;
-    }
-
-    function addDaysToDate() {
-      const base = document.getElementById('date-base').value;
-      const offset = parseInt(document.getElementById('days-offset').value) || 0;
-      const result = document.getElementById('offset-result');
-
-      if (!base) {
-        result.innerHTML = '<p style="color: rgb(90, 90, 90);">select date</p>';
-        return;
-      }
-
-      const d = new Date(base);
-      d.setDate(d.getDate() + offset);
-      const resultStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-
-      result.innerHTML = `<p style="color: rgb(100, 180, 255); font-weight: 700;">${resultStr}</p><p style="font-size: 10px; color: rgb(122, 122, 122); margin-top: 4px;">${offset > 0 ? '+' : ''}${offset} days</p>`;
-    }
-
-    // ------- IMAGE PROCESSING -------
+    // ------- state -------
     let loadedImage = null;
     let bgRemoved = false;
 
@@ -750,7 +187,7 @@
     function setImgStatus(tag, msg) { imgStatus.textContent = '[ ' + tag + ' ] ' + msg; }
     function setDataStatus(tag, msg) { dataStatus.textContent = '[ ' + tag + ' ] ' + msg; }
 
-    // Upload handler
+    // ------- upload -------
     document.getElementById('file-input').addEventListener('change', function (e) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -789,6 +226,7 @@
       existing.src = img.src;
     }
 
+    // ------- remove background (simple near-white knockout) -------
     function removeBackground() {
       if (!loadedImage) { setImgStatus('ERROR', 'no image loaded'); return; }
       setImgStatus('BUSY', 'processing...');
@@ -821,6 +259,7 @@
       }, 30);
     }
 
+    // ------- export image -------
     async function triggerSaveFile(blob, suggestedName, mimeType) {
       if (window.showSaveFilePicker) {
         try {
@@ -907,7 +346,7 @@
       }
     }
 
-    // ------- DATA / CSV -------
+    // ------- data / csv -------
     const area = document.getElementById('data-area');
     let sampleN = 0;
 
@@ -956,19 +395,9 @@
       });
     }
 
-    // Initialize
+    // Initialize data area with sample data
     document.addEventListener('DOMContentLoaded', function() {
       area.value = "id,name,status,value\nITEM-1001,sensor_a,OK,42.5\nITEM-1002,sensor_b,FAIL,0.0";
-      updateCurrentDate();
-      updateCadConversion();
-      selectCompression('none');
-      setInterval(updateCurrentDate, 1000);
-      
-      // Set today's date as default
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('date-base').value = today;
-      document.getElementById('date-from').value = today;
-      document.getElementById('date-to').value = today;
     });
   </script>
 </body>
