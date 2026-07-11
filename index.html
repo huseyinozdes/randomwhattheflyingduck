@@ -335,12 +335,85 @@
         </div>
       </section>
 
+      <section id="tab-fatigue" class="tab-content">
+        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ FATIGUE ]</h2>
+        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">stress-based fatigue life with Ashby-style endurance anchoring.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div>
+            <label for="fatigue-d-mm" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">DIAMETER d [mm]</label>
+            <input id="fatigue-d-mm" type="number" step="0.001" value="10" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-sut-mpa" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">UTS Sut [MPa]</label>
+            <input id="fatigue-sut-mpa" type="number" step="0.1" value="900" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div>
+            <label for="fatigue-fa-n" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">ALTERNATING FORCE Fa [N]</label>
+            <input id="fatigue-fa-n" type="number" step="0.1" value="1200" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-fm-n" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">MEAN FORCE Fm [N]</label>
+            <input id="fatigue-fm-n" type="number" step="0.1" value="300" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-ma-nmm" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">ALTERNATING MOMENT Ma [N·mm]</label>
+            <input id="fatigue-ma-nmm" type="number" step="0.1" value="15000" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-mm-nmm" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">MEAN MOMENT Mm [N·mm]</label>
+            <input id="fatigue-mm-nmm" type="number" step="0.1" value="4000" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label for="fatigue-ashby-ratio" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">ASHBY ENDURANCE RATIO Se'/Sut</label>
+            <input id="fatigue-ashby-ratio" type="number" min="0.05" max="0.95" step="0.01" value="0.50" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-ka" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">SURFACE ka</label>
+            <input id="fatigue-ka" type="number" min="0.1" max="2" step="0.01" value="1.00" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-kb" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">SIZE kb</label>
+            <input id="fatigue-kb" type="number" min="0.1" max="2" step="0.01" value="1.00" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-kc" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">LOAD kc</label>
+            <input id="fatigue-kc" type="number" min="0.1" max="2" step="0.01" value="1.00" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-kd" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">TEMPERATURE kd</label>
+            <input id="fatigue-kd" type="number" min="0.1" max="2" step="0.01" value="1.00" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+          <div>
+            <label for="fatigue-ke" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">RELIABILITY ke</label>
+            <input id="fatigue-ke" type="number" min="0.1" max="2" step="0.01" value="0.90" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="calculateAshbyFatigue()" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-size: 13px;">calculate fatigue life</button>
+        </div>
+
+        <div id="fatigue-results" class="info-panel mb-3">
+          <div style="color: rgb(189, 189, 189); font-weight: 700; font-size: 11px;">RESULTS</div>
+          <div id="fatigue-results-body" style="margin-top: 6px; color: rgb(138, 138, 138);">run calculation to see stresses and life estimate.</div>
+        </div>
+        <p id="fatigue-status" class="text-[13px] brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
+      </section>
+
       <div class="sheet-tab-bar mt-5">
         <button class="sheet-tab active" data-tab-target="tab-image" onclick="switchTab('tab-image', this)">image</button>
         <button class="sheet-tab" data-tab-target="tab-data" onclick="switchTab('tab-data', this)">data</button>
         <button class="sheet-tab" data-tab-target="tab-conversion" onclick="switchTab('tab-conversion', this)">conversion</button>
         <button class="sheet-tab" data-tab-target="tab-cad" onclick="switchTab('tab-cad', this)">cad</button>
         <button class="sheet-tab" data-tab-target="tab-datetime" onclick="switchTab('tab-datetime', this)">date/time</button>
+        <button class="sheet-tab" data-tab-target="tab-fatigue" onclick="switchTab('tab-fatigue', this)">fatigue</button>
       </div>
     </main>
 
@@ -357,6 +430,7 @@
     const imgStatus = document.getElementById('img-status');
     const dataStatus = document.getElementById('data-status');
     const cadStatus = document.getElementById('cad-status');
+    const fatigueStatus = document.getElementById('fatigue-status');
     const preview = document.getElementById('image-preview');
     const placeholder = preview.querySelector('span');
     const fileInput = document.getElementById('file-input');
@@ -377,6 +451,7 @@
     function setImgStatus(tag, msg) { imgStatus.textContent = '[ ' + tag + ' ] ' + msg; }
     function setDataStatus(tag, msg) { dataStatus.textContent = '[ ' + tag + ' ] ' + msg; }
     function setCadStatus(tag, msg) { cadStatus.textContent = '[ ' + tag + ' ] ' + msg; }
+    function setFatigueStatus(tag, msg) { fatigueStatus.textContent = '[ ' + tag + ' ] ' + msg; }
 
     function switchTab(tabId, button) {
       document.querySelectorAll('.tab-content').forEach((el) => el.classList.remove('active'));
@@ -812,6 +887,92 @@
       document.body.removeChild(ta);
     }
 
+    function fatigueNum(id) {
+      return parseFloat(document.getElementById(id).value);
+    }
+
+    function fatigueFmt(v, digits) {
+      return Number.isFinite(v) ? v.toFixed(digits) : 'n/a';
+    }
+
+    function calculateAshbyFatigue() {
+      const d = fatigueNum('fatigue-d-mm');
+      const sut = fatigueNum('fatigue-sut-mpa');
+      const fa = fatigueNum('fatigue-fa-n');
+      const fm = fatigueNum('fatigue-fm-n');
+      const ma = fatigueNum('fatigue-ma-nmm');
+      const mm = fatigueNum('fatigue-mm-nmm');
+      const ratio = fatigueNum('fatigue-ashby-ratio');
+      const ka = fatigueNum('fatigue-ka');
+      const kb = fatigueNum('fatigue-kb');
+      const kc = fatigueNum('fatigue-kc');
+      const kd = fatigueNum('fatigue-kd');
+      const ke = fatigueNum('fatigue-ke');
+      const resultBody = document.getElementById('fatigue-results-body');
+
+      if (![d, sut, fa, fm, ma, mm, ratio, ka, kb, kc, kd, ke].every(Number.isFinite)) {
+        setFatigueStatus('ERROR', 'all fatigue inputs must be valid numbers');
+        return;
+      }
+      if (d <= 0 || sut <= 0) {
+        setFatigueStatus('ERROR', 'diameter and Sut must be positive');
+        return;
+      }
+      if (ratio <= 0 || ratio >= 1) {
+        setFatigueStatus('ERROR', 'Ashby endurance ratio must be between 0 and 1');
+        return;
+      }
+
+      const A = Math.PI * d * d / 4;
+      const I = Math.PI * Math.pow(d, 4) / 64;
+      const c = d / 2;
+
+      const sigmaA = (fa / A) + (ma * c / I);
+      const sigmaM = (fm / A) + (mm * c / I);
+      const sePrime = ratio * sut;
+      const se = sePrime * ka * kb * kc * kd * ke;
+
+      if (!Number.isFinite(se) || se <= 0) {
+        setFatigueStatus('ERROR', 'calculated endurance limit must be positive');
+        return;
+      }
+
+      const goodmanDen = 1 - (sigmaM / sut);
+      if (!Number.isFinite(goodmanDen) || goodmanDen <= 0) {
+        setFatigueStatus('ERROR', 'Goodman correction invalid (mean stress too high)');
+        return;
+      }
+      const sigmaEq = sigmaA / goodmanDen;
+
+      const sigmaAt1k = 0.9 * sut;
+      const b = Math.log10(se / sigmaAt1k) / 3;
+      if (!Number.isFinite(b) || b >= 0) {
+        setFatigueStatus('ERROR', 'Ashby/Basquin slope invalid for selected inputs');
+        return;
+      }
+
+      const sigmaF = sigmaAt1k / Math.pow(2 * 1e3, b);
+      const nf = 0.5 * Math.pow(sigmaEq / sigmaF, 1 / b);
+      const inEnduranceRegion = sigmaEq <= se;
+      const nfText = inEnduranceRegion
+        ? '>= 1.0e6 cycles (endurance region)'
+        : (Number.isFinite(nf) && nf > 0 ? nf.toExponential(3) + ' cycles' : 'n/a');
+
+      resultBody.innerHTML =
+        'A = ' + fatigueFmt(A, 3) + ' mm²<br>' +
+        'I = ' + fatigueFmt(I, 3) + ' mm⁴<br>' +
+        'σa = ' + fatigueFmt(sigmaA, 3) + ' MPa<br>' +
+        'σm = ' + fatigueFmt(sigmaM, 3) + ' MPa<br>' +
+        'Se\' = ' + fatigueFmt(sePrime, 3) + ' MPa<br>' +
+        'Se = ' + fatigueFmt(se, 3) + ' MPa<br>' +
+        'σa,eq (Goodman) = ' + fatigueFmt(sigmaEq, 3) + ' MPa<br>' +
+        'Basquin b = ' + fatigueFmt(b, 4) + '<br>' +
+        'σf\' = ' + fatigueFmt(sigmaF, 3) + ' MPa<br>' +
+        'Estimated Nf = ' + nfText;
+
+      setFatigueStatus('OK', 'fatigue life estimate updated');
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       area.value = "id,name,status,value\nITEM-1001,sensor_a,OK,42.5\nITEM-1002,sensor_b,FAIL,0.0";
       updateCadTargets();
@@ -823,6 +984,7 @@
       document.getElementById('date-to').value = today;
       calculateDaysBetween();
       addDaysToDate();
+      calculateAshbyFatigue();
     });
   </script>
 </body>

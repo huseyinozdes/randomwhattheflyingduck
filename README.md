@@ -39,6 +39,21 @@ $$
 \sigma_{a,\mathrm{eq}} = \sigma_f^{\prime} \left( 2 N_f \right)^b
 $$
 
+### Ashby-style endurance anchoring for stress-life
+
+The fatigue tab uses an Ashby-style endurance ratio to estimate the rotating-beam endurance anchor from ultimate strength:
+
+$$
+S_e^{\prime} = r_{\mathrm{Ashby}} S_{ut}, \qquad
+S_e = S_e^{\prime} k_a k_b k_c k_d k_e
+$$
+
+With a high-cycle anchor at $N=10^6$ and a low-cycle anchor near $0.9S_{ut}$ at $N=10^3$, the Basquin slope is reconstructed as:
+
+$$
+b = \frac{\log_{10}(S_e / (0.9S_{ut}))}{3}
+$$
+
 ### Manson-Coffin-Basquin strain-life relation
 
 $$
