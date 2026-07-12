@@ -22,7 +22,7 @@ test("basic engine preserves request and excludes mini-tool", () => {
 test("advanced engine includes mini-tool notes and verification", () => {
   const result = runWithEngine({
     engine: "advanced",
-    request: "Cut bracket at 2 in",
+    request: "Cut bracket at 2 inch",
     mini_tool_context: "focus on conversion",
   });
   assert.equal(result.execution_path, "advanced_with_mini_tool");
