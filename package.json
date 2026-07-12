@@ -1,0 +1,11 @@
+{
+  "name": "randomwhattheflyingduck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mini-tool adapter verification gate scripts",
+  "scripts": {
+    "lint": "node --check mini_tool_engine_adapter.js",
+    "build": "node -e \"console.log('build: no-op for static browser project')\"",
+    "test": "node --test tests/mini_tool_engine_adapter.test.js"
+  }
+}

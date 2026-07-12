@@ -81,6 +81,16 @@ $$
 
 Open `index.html` in a browser. No build step or dependencies are required.
 
+## Verification gate
+
+Repository-standard verification commands:
+
+- `npm run lint`
+- `npm run build`
+- `npm test`
+
+CI runtime enforcement is defined in `.github/workflows/verification-gate.yml` and runs the same commands on pull requests to `main`.
+
 ## Mini-tool engine adapter for host repositories
 
 `mini_tool_engine_adapter.js` provides a reusable engine dropdown contract and execution adapter that can be imported into another repository's run form.
