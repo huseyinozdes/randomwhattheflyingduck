@@ -1,85 +1,22 @@
-# Fatigue Life Calculator
+# Engineering Utility Console
 
-A browser-based fatigue calculator for quick stress-life, strain-life, and reliability estimates with engineering notation that stays close to handbook form.
+A minimalist, browser-based collection of engineering workflow utilities. The console keeps user files in the browser and requires no backend.
 
-## Models and equations
+## Included utilities
 
-### Stress from area and bending
+- Image preview, simple light-background removal, resizing, and PNG/JPEG export
+- Structured row editing and CSV export
+- Common length, temperature, and weight conversions
+- OBJ-to-STL mesh conversion and STL pass-through export
+- Date differences, date offsets, and copyable date/time output
 
-For a round section:
-
-$$
-A = \frac{\pi d^2}{4}, \qquad I = \frac{\pi d^4}{64}, \qquad c = \frac{d}{2}
-$$
-
-$$
-\sigma = \frac{F}{A}, \qquad \sigma_b = \frac{M c}{I}
-$$
-
-With alternating and mean loading:
-
-$$
-\sigma_a = \frac{F_a}{A} + \frac{M_a c}{I}, \qquad
-\sigma_m = \frac{F_m}{A} + \frac{M_m c}{I}
-$$
-
-### Goodman correction
-
-$$
-\frac{\sigma_a}{S_e} + \frac{\sigma_m}{S_{ut}} = 1
-$$
-
-$$
-\sigma_{a,\mathrm{eq}} = \frac{\sigma_a}{1 - \sigma_m / S_{ut}}
-$$
-
-### Basquin stress-life relation
-
-$$
-\sigma_{a,\mathrm{eq}} = \sigma_f^{\prime} \left( 2 N_f \right)^b
-$$
-
-### Manson-Coffin-Basquin strain-life relation
-
-$$
-\varepsilon_a = \frac{\sigma_f^{\prime}}{E} \left( 2 N_f \right)^b + \varepsilon_f^{\prime} \left( 2 N_f \right)^c
-$$
-
-### Weibull reliability
-
-$$
-F(N) = 1 - \exp \left[ - \left( \frac{N}{\eta} \right)^\beta \right], \qquad
-R(N) = \exp \left[ - \left( \frac{N}{\eta} \right)^\beta \right]
-$$
-
-$$
-B_{10} = \eta \left[ -\ln(0.90) \right]^{1/\beta}, \qquad
-B_{50} = \eta \left( \ln 2 \right)^{1/\beta}
-$$
-
-## Nomenclature
-
-| Symbol | Meaning |
-| --- | --- |
-| $\sigma_a$ | alternating stress amplitude |
-| $\sigma_m$ | mean stress |
-| $\sigma_{a,\mathrm{eq}}$ | Goodman-corrected equivalent alternating stress |
-| $S_{ut}$ | ultimate tensile strength |
-| $S_e^{\prime}$ | unmodified endurance limit |
-| $S_e$ | corrected endurance limit |
-| $N_f$ | cycles to failure |
-| $\varepsilon_a$ | strain amplitude |
-| $\sigma_f^{\prime}$ | fatigue strength coefficient |
-| $\varepsilon_f^{\prime}$ | fatigue ductility coefficient |
-| $\beta$ | Weibull shape parameter |
-| $\eta$ | Weibull scale parameter, or characteristic life |
-| $R(N)$ | survival probability at life $N$ |
-| $B_{10}$ | life at 10% cumulative failure probability |
-| $B_{50}$ | median life |
+The CAD converter intentionally supports only OBJ-to-STL and STL-to-STL operations. Other formats are visible as planning references and are not presented as completed conversions.
 
 ## Local use
 
 Open `index.html` in a browser. No build step or dependencies are required.
+
+The interface loads Tailwind CSS and fonts from public CDNs, so the visual styling requires a network connection on first load. User-selected files are processed locally in the browser.
 
 ## Verification gate
 
