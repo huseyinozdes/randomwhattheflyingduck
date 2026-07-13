@@ -51,11 +51,16 @@ jobs:
           echo "---"
 
           # ── HTTP status + response time ─────────────────────────────────────
+          COOKIE_JAR=$(mktemp)
+          trap 'rm -f "$COOKIE_JAR"' EXIT
           CURL_OUT=$(curl -o /dev/null -s \
             -w "%{http_code}|%{time_total}" \
             --max-time 10 \
             --connect-timeout 5 \
+            --max-redirs 10 \
             --location \
+            --cookie-jar "$COOKIE_JAR" \
+            --cookie "$COOKIE_JAR" \
             "$URL" 2>/dev/null) || CURL_OUT="000|0.000"
 
           HTTP_CODE="${CURL_OUT%%|*}"
