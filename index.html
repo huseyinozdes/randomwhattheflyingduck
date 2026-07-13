@@ -11,29 +11,53 @@
   <link href="https://fonts.cdnfonts.com/css/gunship" rel="stylesheet">
 
   <style>
+    :root {
+      /* Surface colours */
+      --color-bg-page:       #111111;
+      --color-bg-raised:     #161616;
+      --color-bg-elevated:   #1c1c1c;
+      --color-bg-card:       #1a1a1a;
+      --color-bg-interactive:#1c1c1c;
+      --color-bg-hover:      #282828;
+      /* Border */
+      --color-border:        #3a3a3a;
+      --line: var(--color-border);
+      /* Text */
+      --color-text-strong:   #f5f5f5;
+      --color-text-default:  #e5e5e5;
+      --color-text-muted:    #bdbdbd;
+      --color-text-subtle:   #8a8a8a;
+      --color-text-faint:    #7a7a7a;
+      --color-text-dim:      #6a6a6a;
+      --color-text-ghost:    #5a5a5a;
+      /* Accent */
+      --color-accent:        #64b4ff;
+      /* Focus outline */
+      --color-focus:         #d4d4d4;
+    }
+
     body { font-family: 'Space Mono', ui-monospace, monospace; }
-    :root { --line: #3a3a3a; }
-    .brd { border: 1px solid var(--line, #3a3a3a); }
-    .brd-b { border-bottom: 1px solid var(--line, #3a3a3a); }
+    .brd { border: 1px solid var(--color-border); }
+    .brd-b { border-bottom: 1px solid var(--color-border); }
     .btn { transition: background-color .12s ease, color .12s ease; }
-    .native-input:focus { outline: none; border-color: #d4d4d4; }
+    .native-input:focus { outline: none; border-color: var(--color-focus); }
     input, select, textarea, button { font-family: inherit; }
     select { -webkit-appearance: none; appearance: none; }
     textarea { resize: vertical; }
 
     button:focus-visible, a:focus-visible, input:focus-visible,
     select:focus-visible, textarea:focus-visible {
-      outline: 2px solid #d4d4d4;
+      outline: 2px solid var(--color-focus);
       outline-offset: 2px;
     }
 
     .transparent-mode {
-      background-color: #1a1a1a;
+      background-color: var(--color-bg-card);
       background-image:
-        linear-gradient(45deg, #2a2a2a 25%, transparent 25%),
-        linear-gradient(-45deg, #2a2a2a 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #2a2a2a 75%),
-        linear-gradient(-45deg, transparent 75%, #2a2a2a 75%);
+        linear-gradient(45deg, var(--color-bg-hover) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--color-bg-hover) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--color-bg-hover) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--color-bg-hover) 75%);
       background-size: 16px 16px;
       background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
     }
@@ -46,14 +70,14 @@
       gap: 2px;
       overflow-x: auto;
       padding-top: 8px;
-      border-top: 1px solid var(--line, #3a3a3a);
+      border-top: 1px solid var(--color-border);
     }
 
     .sheet-tab {
-      border: 1px solid var(--line, #3a3a3a);
+      border: 1px solid var(--color-border);
       border-top: none;
-      background: rgb(22, 22, 22);
-      color: rgb(138, 138, 138);
+      background: var(--color-bg-raised);
+      color: var(--color-text-subtle);
       font-family: 'Gunship', 'Space Mono', ui-monospace, monospace;
       font-size: 11px;
       font-weight: 400;
@@ -67,15 +91,15 @@
     }
 
     .sheet-tab:hover {
-      background: rgb(28, 28, 28);
-      color: rgb(189, 189, 189);
+      background: var(--color-bg-interactive);
+      color: var(--color-text-muted);
     }
 
     .sheet-tab.active {
-      background: rgb(40, 40, 40);
-      color: rgb(100, 180, 255);
+      background: var(--color-bg-hover);
+      color: var(--color-accent);
       font-weight: 400;
-      border-top: 2px solid rgb(100, 180, 255);
+      border-top: 2px solid var(--color-accent);
     }
 
     .converter-pair {
@@ -90,71 +114,78 @@
 
     .converter-swap {
       padding: 6px 10px;
-      background: rgb(28, 28, 28);
-      border: 1px solid var(--line, #3a3a3a);
+      background: var(--color-bg-interactive);
+      border: 1px solid var(--color-border);
       cursor: pointer;
       font-size: 12px;
       font-weight: 700;
-      color: rgb(189, 189, 189);
+      color: var(--color-text-muted);
     }
 
     .converter-swap:hover {
-      background: rgb(40, 40, 40);
-      color: rgb(100, 180, 255);
+      background: var(--color-bg-hover);
+      color: var(--color-accent);
     }
 
     .info-panel {
-      background: rgb(22, 22, 22);
-      border: 1px solid var(--line, #3a3a3a);
+      background: var(--color-bg-raised);
+      border: 1px solid var(--color-border);
       padding: 10px;
       font-size: 11px;
-      color: rgb(138, 138, 138);
+      color: var(--color-text-subtle);
       line-height: 1.5;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   </style>
 </head>
-<body class="min-h-screen w-full" style="background: rgb(17, 17, 17); color: rgb(229, 229, 229);">
+<body class="min-h-screen w-full" style="background: var(--color-bg-page); color: var(--color-text-default);">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
     <header class="brd-b pb-5 mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
-        <h1 class="tracking-tight" style="color: rgb(245, 245, 245); font-weight: 700; font-size: 28px; letter-spacing: -0.02rem;">ENG // UTILITY CONSOLE</h1>
-        <p class="mt-1" style="color: rgb(138, 138, 138); font-size: 13px;">internal image + data processing tool</p>
+        <h1 class="tracking-tight" style="color: var(--color-text-strong); font-weight: 700; font-size: 28px; letter-spacing: -0.02rem;">ENG // UTILITY CONSOLE</h1>
+        <p class="mt-1" style="color: var(--color-text-subtle); font-size: 13px;">internal image + data processing tool</p>
       </div>
       <div class="flex flex-col sm:items-end gap-2">
         <div class="flex items-center gap-2">
-          <label for="user-initials" class="text-[11px]" style="color: rgb(122, 122, 122);">OPERATOR INITIALS</label>
+          <label for="user-initials" class="text-[11px]" style="color: var(--color-text-faint);">OPERATOR INITIALS</label>
           <input id="user-initials" type="text" class="native-input brd bg-transparent px-2 py-1 text-[12px] w-20 text-neutral-200 text-center" maxlength="8" placeholder="ENG">
         </div>
-        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-size: 12px;">build 1.4.0 // status: online</p>
+        <p class="sm:text-right" style="color: var(--color-text-dim); font-size: 12px;">build 1.4.0 // status: online</p>
       </div>
     </header>
 
     <main class="brd p-5">
       <section id="tab-image" class="tab-content active">
-        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ IMAGE ]</h2>
-        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">load, process, and export raster assets.</p>
+        <h2 style="color: var(--color-text-strong); font-weight: 700; font-size: 15px;">[ IMAGE ]</h2>
+        <p class="mt-1 mb-5" style="color: var(--color-text-faint); font-size: 12px;">load, process, and export raster assets.</p>
 
         <div class="mb-5">
-          <label for="file-input" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">SOURCE IMAGE</label>
+          <label for="file-input" class="block mb-2" style="color: var(--color-text-muted); font-size: 12px;">SOURCE IMAGE</label>
           <div class="flex flex-wrap items-center gap-3">
             <div class="relative inline-block">
               <input id="file-input" type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" style="z-index: 2;">
-              <span class="btn brd px-4 py-2 inline-block" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-size: 13px;">load image...</span>
+              <span class="btn brd px-4 py-2 inline-block" style="background: var(--color-bg-interactive); color: var(--color-text-default); font-size: 13px;">load image...</span>
             </div>
             <span id="file-name" class="text-[13px] text-neutral-500 truncate max-w-[200px]">no file</span>
           </div>
         </div>
 
         <div id="image-preview" class="brd flex items-center justify-center overflow-hidden mb-4" style="height:220px;">
-          <span class="px-4 text-center" style="color: rgb(90, 90, 90); font-size: 12px;">[ no image loaded ]<br>select a file to preview</span>
+          <span class="px-4 text-center" style="color: var(--color-text-ghost); font-size: 12px;">[ no image loaded ]<br>select a file to preview</span>
         </div>
 
         <div class="mb-5">
-          <button type="button" class="btn brd px-4 py-2 w-full" onclick="removeBackground()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-size: 13px;">remove background</button>
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="EngUtilConsole.removeBackground()" style="background: var(--color-bg-interactive); color: var(--color-text-default); font-size: 13px;">remove background</button>
         </div>
 
         <div class="mb-5">
-          <label for="res-select" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">OUTPUT RESOLUTION</label>
+          <label for="res-select" class="block mb-2" style="color: var(--color-text-muted); font-size: 12px;">OUTPUT RESOLUTION</label>
           <select id="res-select" class="native-input brd bg-transparent px-3 py-2 w-full text-[14px] text-neutral-200">
             <option value="640x480">640 x 480</option>
             <option value="1280x720" selected>1280 x 720</option>
@@ -166,106 +197,106 @@
 
         <div class="mb-4">
           <div class="grid grid-cols-2 gap-3">
-            <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('png')" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-size: 13px;">download png</button>
-            <button type="button" class="btn brd px-4 py-2" onclick="exportImageSync('jpeg')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-size: 13px;">download jpeg</button>
+            <button type="button" class="btn brd px-4 py-2" onclick="EngUtilConsole.exportImageSync('png')" style="background: var(--color-text-default); color: var(--color-bg-page); font-weight: 700; font-size: 13px;">download png</button>
+            <button type="button" class="btn brd px-4 py-2" onclick="EngUtilConsole.exportImageSync('jpeg')" style="background: var(--color-bg-interactive); color: var(--color-text-default); font-size: 13px;">download jpeg</button>
           </div>
         </div>
         <p id="img-status" class="text-[13px] brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
       </section>
 
       <section id="tab-data" class="tab-content">
-        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ DATA ]</h2>
-        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">edit structured rows and export as csv.</p>
+        <h2 style="color: var(--color-text-strong); font-weight: 700; font-size: 15px;">[ DATA ]</h2>
+        <p class="mt-1 mb-5" style="color: var(--color-text-faint); font-size: 12px;">edit structured rows and export as csv.</p>
 
         <div class="mb-3">
-          <label for="data-area" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">STRUCTURED DATA</label>
+          <label for="data-area" class="block mb-2" style="color: var(--color-text-muted); font-size: 12px;">STRUCTURED DATA</label>
           <textarea id="data-area" rows="10" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] leading-relaxed text-neutral-200" spellcheck="false"></textarea>
         </div>
 
         <div class="flex flex-wrap gap-3 mb-5">
-          <button type="button" class="btn brd px-4 py-2" onclick="addSampleRow()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-size: 13px;">+ sample row</button>
-          <button type="button" class="btn brd px-4 py-2" onclick="clearData()" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-size: 13px;">clear buffer</button>
+          <button type="button" class="btn brd px-4 py-2" onclick="EngUtilConsole.addSampleRow()" style="background: var(--color-bg-interactive); color: var(--color-text-default); font-size: 13px;">+ sample row</button>
+          <button type="button" class="btn brd px-4 py-2" onclick="EngUtilConsole.clearData()" style="background: var(--color-bg-interactive); color: var(--color-text-default); font-size: 13px;">clear buffer</button>
         </div>
 
         <div class="mb-4">
-          <button type="button" class="btn brd px-4 py-2 w-full" onclick="exportCsvSync()" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-size: 13px;">download csv</button>
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="EngUtilConsole.exportCsvSync()" style="background: var(--color-text-default); color: var(--color-bg-page); font-weight: 700; font-size: 13px;">download csv</button>
         </div>
         <p id="data-status" class="text-[13px] brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
       </section>
 
       <section id="tab-conversion" class="tab-content">
-        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ CONVERSION ]</h2>
-        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">bidirectional engineering unit conversion.</p>
+        <h2 style="color: var(--color-text-strong); font-weight: 700; font-size: 15px;">[ CONVERSION ]</h2>
+        <p class="mt-1 mb-5" style="color: var(--color-text-faint); font-size: 12px;">bidirectional engineering unit conversion.</p>
 
         <div class="converter-pair">
           <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">INCHES</label>
-            <input type="number" id="conv-in" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('in')" step="0.001">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">INCHES</label>
+            <input type="number" id="conv-in" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertLength('in')" step="0.001">
           </div>
-          <button class="converter-swap" onclick="swapConversion('length')">↔</button>
+          <button class="converter-swap" onclick="EngUtilConsole.swapConversion('length')">↔</button>
           <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">MM</label>
-            <input type="number" id="conv-mm" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('mm')" step="0.001">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">MM</label>
+            <input type="number" id="conv-mm" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertLength('mm')" step="0.001">
           </div>
         </div>
 
         <div class="converter-pair">
           <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">FEET</label>
-            <input type="number" id="conv-ft" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('ft')" step="0.01">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">FEET</label>
+            <input type="number" id="conv-ft" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertLength('ft')" step="0.01">
           </div>
-          <button class="converter-swap" onclick="swapConversion('feet-m')">↔</button>
+          <button class="converter-swap" onclick="EngUtilConsole.swapConversion('feet-m')">↔</button>
           <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">METERS</label>
-            <input type="number" id="conv-m" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertLength('m')" step="0.01">
-          </div>
-        </div>
-
-        <div class="converter-pair">
-          <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">CELSIUS</label>
-            <input type="number" id="conv-c" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertTemp('c')" step="0.1">
-          </div>
-          <button class="converter-swap" onclick="swapConversion('temp')">↔</button>
-          <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">FAHRENHEIT</label>
-            <input type="number" id="conv-f" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertTemp('f')" step="0.1">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">METERS</label>
+            <input type="number" id="conv-m" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertLength('m')" step="0.01">
           </div>
         </div>
 
         <div class="converter-pair">
           <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">POUNDS</label>
-            <input type="number" id="conv-lb" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertWeight('lb')" step="0.01">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">CELSIUS</label>
+            <input type="number" id="conv-c" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertTemp('c')" step="0.1">
           </div>
-          <button class="converter-swap" onclick="swapConversion('weight')">↔</button>
+          <button class="converter-swap" onclick="EngUtilConsole.swapConversion('temp')">↔</button>
           <div class="converter-input">
-            <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">KILOGRAMS</label>
-            <input type="number" id="conv-kg" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertWeight('kg')" step="0.01">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">FAHRENHEIT</label>
+            <input type="number" id="conv-f" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertTemp('f')" step="0.1">
+          </div>
+        </div>
+
+        <div class="converter-pair">
+          <div class="converter-input">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">POUNDS</label>
+            <input type="number" id="conv-lb" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertWeight('lb')" step="0.01">
+          </div>
+          <button class="converter-swap" onclick="EngUtilConsole.swapConversion('weight')">↔</button>
+          <div class="converter-input">
+            <label style="font-size: 11px; color: var(--color-text-faint); margin-bottom: 3px;">KILOGRAMS</label>
+            <input type="number" id="conv-kg" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="EngUtilConsole.convertWeight('kg')" step="0.01">
           </div>
         </div>
       </section>
 
       <section id="tab-cad" class="tab-content">
-        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ CAD ]</h2>
-        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">upload CAD/mesh files and convert where supported.</p>
+        <h2 style="color: var(--color-text-strong); font-weight: 700; font-size: 15px;">[ CAD ]</h2>
+        <p class="mt-1 mb-5" style="color: var(--color-text-faint); font-size: 12px;">upload CAD/mesh files and convert where supported.</p>
 
         <div class="mb-4">
-          <label for="cad-file-input" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">SOURCE CAD FILE</label>
+          <label for="cad-file-input" class="block mb-2" style="color: var(--color-text-muted); font-size: 12px;">SOURCE CAD FILE</label>
           <div class="flex flex-wrap items-center gap-3">
             <div class="relative inline-block">
               <input id="cad-file-input" type="file" class="absolute inset-0 opacity-0 cursor-pointer" style="z-index: 2;">
-              <span class="btn brd px-4 py-2 inline-block" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229); font-size: 13px;">load cad file...</span>
+              <span class="btn brd px-4 py-2 inline-block" style="background: var(--color-bg-interactive); color: var(--color-text-default); font-size: 13px;">load cad file...</span>
             </div>
             <span id="cad-file-name" class="text-[13px] text-neutral-500 truncate max-w-[260px]">no file</span>
           </div>
-          <p class="mt-2" style="color: rgb(106, 106, 106); font-size: 11px;">currently executable conversion support: OBJ → STL, STL → STL.</p>
+          <p class="mt-2" style="color: var(--color-text-dim); font-size: 11px;">currently executable conversion support: OBJ → STL, STL → STL.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
           <div>
-            <label for="cad-from-format" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">SOURCE FORMAT</label>
-            <select id="cad-from-format" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200" onchange="updateCadTargets()">
+            <label for="cad-from-format" class="block mb-2" style="color: var(--color-text-muted); font-size: 12px;">SOURCE FORMAT</label>
+            <select id="cad-from-format" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200" onchange="EngUtilConsole.updateCadTargets()">
               <option value="obj">OBJ</option>
               <option value="stl">STL</option>
               <option value="dxf">DXF</option>
@@ -275,23 +306,23 @@
             </select>
           </div>
           <div>
-            <label for="cad-to-format" class="block mb-2" style="color: rgb(189, 189, 189); font-size: 12px;">TARGET FORMAT</label>
+            <label for="cad-to-format" class="block mb-2" style="color: var(--color-text-muted); font-size: 12px;">TARGET FORMAT</label>
             <select id="cad-to-format" class="native-input brd bg-transparent px-3 py-2 w-full text-[13px] text-neutral-200"></select>
           </div>
         </div>
 
         <div class="info-panel mb-4">
-          <div style="color: rgb(189, 189, 189); font-weight: 700; font-size: 11px;">TARGET DATA FORMATS</div>
-          <div id="cad-target-info" style="margin-top: 6px; color: rgb(138, 138, 138);"></div>
+          <div style="color: var(--color-text-muted); font-weight: 700; font-size: 11px;">TARGET DATA FORMATS</div>
+          <div id="cad-target-info" style="margin-top: 6px; color: var(--color-text-subtle);"></div>
         </div>
 
         <div class="mb-4">
-          <button type="button" class="btn brd px-4 py-2 w-full" onclick="convertCadFile()" style="background: rgb(229, 229, 229); color: rgb(17, 17, 17); font-weight: 700; font-size: 13px;">convert file</button>
+          <button type="button" class="btn brd px-4 py-2 w-full" onclick="EngUtilConsole.convertCadFile()" style="background: var(--color-text-default); color: var(--color-bg-page); font-weight: 700; font-size: 13px;">convert file</button>
         </div>
         <p id="cad-status" class="text-[13px] brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
 
         <div class="info-panel mt-4">
-          <div style="color: rgb(189, 189, 189); font-weight: 700; font-size: 11px;">CONVERSION NOTES</div>
+          <div style="color: var(--color-text-muted); font-weight: 700; font-size: 11px;">CONVERSION NOTES</div>
           <div style="margin-top: 6px; font-size: 11px;">
             <div>• OBJ → STL: triangle mesh conversion, outputs ASCII STL</div>
             <div>• STL → STL: pass-through with normalized filename</div>
@@ -301,529 +332,745 @@
       </section>
 
       <section id="tab-datetime" class="tab-content">
-        <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ DATE / TIME ]</h2>
-        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">date operations with one-click copy.</p>
+        <h2 style="color: var(--color-text-strong); font-weight: 700; font-size: 15px;">[ DATE / TIME ]</h2>
+        <p class="mt-1 mb-5" style="color: var(--color-text-faint); font-size: 12px;">date operations with one-click copy.</p>
 
         <div class="mb-5">
-          <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">CURRENT DATE/TIME</label>
+          <label style="font-size: 11px; color: var(--color-text-muted); display: block; margin-bottom: 6px; font-weight: 700;">CURRENT DATE/TIME</label>
           <div class="brd bg-transparent px-3 py-2">
-            <div id="current-date-display" style="color: rgb(100, 180, 255); font-size: 12px; font-weight: 700;"></div>
-            <div id="current-time-display" style="font-size: 11px; color: rgb(189, 189, 189); margin-top: 4px;"></div>
+            <div id="current-date-display" style="color: var(--color-accent); font-size: 12px; font-weight: 700;"></div>
+            <div id="current-time-display" style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;"></div>
           </div>
-          <button type="button" class="btn brd px-3 py-1 mt-2 text-[11px]" onclick="copyOutput('current-datetime-copy')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229);">copy current datetime</button>
+          <button type="button" class="btn brd px-3 py-1 mt-2 text-[11px]" onclick="EngUtilConsole.copyOutput('current-datetime-copy')" style="background: var(--color-bg-interactive); color: var(--color-text-default);">copy current datetime</button>
           <div id="current-datetime-copy" style="display:none;"></div>
         </div>
 
         <div class="mb-5">
-          <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">DAYS BETWEEN</label>
+          <label style="font-size: 11px; color: var(--color-text-muted); display: block; margin-bottom: 6px; font-weight: 700;">DAYS BETWEEN</label>
           <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px;">
-            <input type="date" id="date-from" class="native-input brd bg-transparent px-2 py-2 text-[12px]" oninput="calculateDaysBetween()">
-            <input type="date" id="date-to" class="native-input brd bg-transparent px-2 py-2 text-[12px]" oninput="calculateDaysBetween()">
+            <input type="date" id="date-from" class="native-input brd bg-transparent px-2 py-2 text-[12px]" oninput="EngUtilConsole.calculateDaysBetween()">
+            <input type="date" id="date-to" class="native-input brd bg-transparent px-2 py-2 text-[12px]" oninput="EngUtilConsole.calculateDaysBetween()">
           </div>
-          <div id="days-result" class="brd px-3 py-2" style="background: rgb(22, 22, 22); color: rgb(138, 138, 138); font-size: 12px;">select two dates</div>
-          <button type="button" class="btn brd px-3 py-1 mt-2 text-[11px]" onclick="copyOutput('days-result')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229);">copy days result</button>
+          <div id="days-result" class="brd px-3 py-2" style="background: var(--color-bg-raised); color: var(--color-text-subtle); font-size: 12px;">select two dates</div>
+          <button type="button" class="btn brd px-3 py-1 mt-2 text-[11px]" onclick="EngUtilConsole.copyOutput('days-result')" style="background: var(--color-bg-interactive); color: var(--color-text-default);">copy days result</button>
         </div>
 
         <div>
-          <label style="font-size: 11px; color: rgb(189, 189, 189); display: block; margin-bottom: 6px; font-weight: 700;">ADD/SUBTRACT DAYS</label>
+          <label style="font-size: 11px; color: var(--color-text-muted); display: block; margin-bottom: 6px; font-weight: 700;">ADD/SUBTRACT DAYS</label>
           <div style="display: flex; gap: 6px; margin-bottom: 6px;">
             <input type="date" id="date-base" class="native-input brd bg-transparent px-2 py-2 text-[12px] flex-1">
-            <input type="number" id="days-offset" class="native-input brd bg-transparent px-2 py-2 text-[12px] w-20" placeholder="0" oninput="addDaysToDate()">
+            <input type="number" id="days-offset" class="native-input brd bg-transparent px-2 py-2 text-[12px] w-20" placeholder="0" oninput="EngUtilConsole.addDaysToDate()">
           </div>
-          <div id="offset-result" class="brd px-3 py-2" style="background: rgb(22, 22, 22); color: rgb(138, 138, 138); font-size: 12px;">select date</div>
-          <button type="button" class="btn brd px-3 py-1 mt-2 text-[11px]" onclick="copyOutput('offset-result')" style="background: rgb(28, 28, 28); color: rgb(229, 229, 229);">copy offset result</button>
+          <div id="offset-result" class="brd px-3 py-2" style="background: var(--color-bg-raised); color: var(--color-text-subtle); font-size: 12px;">select date</div>
+          <button type="button" class="btn brd px-3 py-1 mt-2 text-[11px]" onclick="EngUtilConsole.copyOutput('offset-result')" style="background: var(--color-bg-interactive); color: var(--color-text-default);">copy offset result</button>
         </div>
       </section>
 
       <div class="sheet-tab-bar mt-5">
-        <button class="sheet-tab active" data-tab-target="tab-image" onclick="switchTab('tab-image', this)">image</button>
-        <button class="sheet-tab" data-tab-target="tab-data" onclick="switchTab('tab-data', this)">data</button>
-        <button class="sheet-tab" data-tab-target="tab-conversion" onclick="switchTab('tab-conversion', this)">conversion</button>
-        <button class="sheet-tab" data-tab-target="tab-cad" onclick="switchTab('tab-cad', this)">cad</button>
-        <button class="sheet-tab" data-tab-target="tab-datetime" onclick="switchTab('tab-datetime', this)">date/time</button>
+        <button class="sheet-tab active" data-tab-target="tab-image" onclick="EngUtilConsole.switchTab('tab-image', this)">image</button>
+        <button class="sheet-tab" data-tab-target="tab-data" onclick="EngUtilConsole.switchTab('tab-data', this)">data</button>
+        <button class="sheet-tab" data-tab-target="tab-conversion" onclick="EngUtilConsole.switchTab('tab-conversion', this)">conversion</button>
+        <button class="sheet-tab" data-tab-target="tab-cad" onclick="EngUtilConsole.switchTab('tab-cad', this)">cad</button>
+        <button class="sheet-tab" data-tab-target="tab-datetime" onclick="EngUtilConsole.switchTab('tab-datetime', this)">date/time</button>
       </div>
     </main>
 
-    <footer class="mt-8 pt-5" style="border-top:1px solid var(--line);">
-      <p style="color: rgb(90, 90, 90); font-size: 11px;">ENG // UTILITY CONSOLE — no data leaves this session. all processing runs locally.</p>
+    <footer class="mt-8 pt-5" style="border-top:1px solid var(--color-border);">
+      <p style="color: var(--color-text-ghost); font-size: 11px;">ENG // UTILITY CONSOLE — no data leaves this session. all processing runs locally.</p>
     </footer>
   </div>
 
   <script>
-    let loadedImage = null;
-    let bgRemoved = false;
-    let cadLoadedFile = null;
+    /**
+     * ENG // UTILITY CONSOLE — inline script
+     *
+     * All state and logic is encapsulated inside the EngUtilConsole IIFE so
+     * nothing leaks into the global scope beyond the single namespace object
+     * returned to `window.EngUtilConsole`.
+     */
+    window.EngUtilConsole = (function () {
+      'use strict';
 
-    const imgStatus = document.getElementById('img-status');
-    const dataStatus = document.getElementById('data-status');
-    const cadStatus = document.getElementById('cad-status');
-    const preview = document.getElementById('image-preview');
-    const placeholder = preview.querySelector('span');
-    const fileInput = document.getElementById('file-input');
-    const cadFileInput = document.getElementById('cad-file-input');
-    const area = document.getElementById('data-area');
+      /* ------------------------------------------------------------------ */
+      /*  Configuration — all magic numbers documented here                  */
+      /* ------------------------------------------------------------------ */
 
-    const cadTargetMap = {
-      obj: ['stl'],
-      stl: ['stl', 'obj'],
-      dxf: ['stl', 'obj'],
-      dwg: ['stl', 'obj'],
-      step: ['stl', 'obj'],
-      iges: ['stl', 'obj']
-    };
+      /**
+       * @typedef {Object} ConversionFactors
+       * @property {number} IN_TO_MM   - 1 inch = 25.4 mm exactly (ISO 1000 / NIST SP 330).
+       * @property {number} FT_TO_M    - 1 foot = 0.3048 m exactly (ISO 1000 / NIST SP 330).
+       * @property {number} LB_TO_KG   - 1 avoirdupois pound = 0.45359237 kg exactly (ISO 1000).
+       */
 
-    let sampleN = 0;
+      const CONFIG = {
+        /**
+         * Background-removal luminance threshold.
+         * Pixels with R, G, and B all ≥ this value are treated as near-white
+         * and made transparent. 235/255 ≈ 92 % white.  Empirically chosen to
+         * remove scanner/document white backgrounds without erasing light-grey
+         * engineering features.
+         */
+        BG_REMOVAL_THRESHOLD: 235,
 
-    function setImgStatus(tag, msg) { imgStatus.textContent = '[ ' + tag + ' ] ' + msg; }
-    function setDataStatus(tag, msg) { dataStatus.textContent = '[ ' + tag + ' ] ' + msg; }
-    function setCadStatus(tag, msg) { cadStatus.textContent = '[ ' + tag + ' ] ' + msg; }
-
-    function switchTab(tabId, button) {
-      document.querySelectorAll('.tab-content').forEach((el) => el.classList.remove('active'));
-      document.querySelectorAll('.sheet-tab').forEach((el) => el.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      button.classList.add('active');
-    }
-
-    function isImageFile(file) {
-      if (!file) return false;
-      if (file.type && file.type.startsWith('image/')) return true;
-      return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(file.name || '');
-    }
-
-    function loadSelectedImage(file) {
-      if (!file) { setImgStatus('WARN', 'no file selected'); return; }
-      if (!isImageFile(file)) { setImgStatus('ERROR', 'file is not an image'); return; }
-      document.getElementById('file-name').textContent = file.name;
-      const reader = new FileReader();
-      reader.onload = function (ev) {
-        const img = new Image();
-        img.onload = function () {
-          loadedImage = img;
-          bgRemoved = false;
-          preview.classList.remove('transparent-mode');
-          renderPreview(img);
-          setImgStatus('OK', 'image loaded ' + img.naturalWidth + 'x' + img.naturalHeight);
-        };
-        img.onerror = function () { setImgStatus('ERROR', 'could not decode image'); };
-        img.src = ev.target.result;
+        /** Unit conversion factors (all exact per ISO 1000:1992). */
+        CONVERSION: {
+          IN_TO_MM: 25.4,
+          FT_TO_M: 0.3048,
+          LB_TO_KG: 0.45359237,
+        },
       };
-      reader.onerror = function () { setImgStatus('ERROR', 'read failed'); };
-      reader.readAsDataURL(file);
-    }
 
-    fileInput.addEventListener('change', function (e) { loadSelectedImage(e.target.files && e.target.files[0]); });
-    fileInput.addEventListener('input', function (e) { loadSelectedImage(e.target.files && e.target.files[0]); });
+      /* ------------------------------------------------------------------ */
+      /*  Module-level state                                                  */
+      /* ------------------------------------------------------------------ */
 
-    function renderPreview(img) {
-      if (placeholder) placeholder.style.display = 'none';
-      let existing = preview.querySelector('img.preview-img');
-      if (!existing) {
-        existing = document.createElement('img');
-        existing.className = 'preview-img';
-        existing.style.maxWidth = '100%';
-        existing.style.maxHeight = '100%';
-        existing.style.objectFit = 'contain';
-        preview.appendChild(existing);
+      let loadedImage = null;   // HTMLImageElement currently loaded in the image tab
+      let bgRemoved   = false;  // true after background removal has been applied
+      let cadLoadedFile = null; // File object loaded in the CAD tab
+
+      /* ------------------------------------------------------------------ */
+      /*  DOM references — resolved once on script load                      */
+      /* ------------------------------------------------------------------ */
+
+      const imgStatus   = document.getElementById('img-status');
+      const dataStatus  = document.getElementById('data-status');
+      const cadStatus   = document.getElementById('cad-status');
+      const preview     = document.getElementById('image-preview');
+      const placeholder = preview.querySelector('span');
+      const fileInput   = document.getElementById('file-input');
+      const cadFileInput = document.getElementById('cad-file-input');
+      const area        = document.getElementById('data-area');
+
+      /** OBJ→target format adjacency map for the CAD converter. */
+      const cadTargetMap = {
+        obj:  ['stl'],
+        stl:  ['stl', 'obj'],
+        dxf:  ['stl', 'obj'],
+        dwg:  ['stl', 'obj'],
+        step: ['stl', 'obj'],
+        iges: ['stl', 'obj'],
+      };
+
+      let sampleN = 0;
+
+      /* ------------------------------------------------------------------ */
+      /*  Status helpers                                                      */
+      /* ------------------------------------------------------------------ */
+
+      /** @param {string} tag  @param {string} msg */
+      function setImgStatus(tag, msg)  { imgStatus.textContent  = '[ ' + tag + ' ] ' + msg; }
+      /** @param {string} tag  @param {string} msg */
+      function setDataStatus(tag, msg) { dataStatus.textContent = '[ ' + tag + ' ] ' + msg; }
+      /** @param {string} tag  @param {string} msg */
+      function setCadStatus(tag, msg)  { cadStatus.textContent  = '[ ' + tag + ' ] ' + msg; }
+
+      /* ------------------------------------------------------------------ */
+      /*  Tab navigation                                                      */
+      /* ------------------------------------------------------------------ */
+
+      /**
+       * Activate a named tab panel and update the corresponding tab button.
+       * @param {string} tabId  - id of the <section> to show
+       * @param {HTMLElement} button - the clicked .sheet-tab element
+       */
+      function switchTab(tabId, button) {
+        document.querySelectorAll('.tab-content').forEach(function (el) { el.classList.remove('active'); });
+        document.querySelectorAll('.sheet-tab').forEach(function (el) { el.classList.remove('active'); });
+        document.getElementById(tabId).classList.add('active');
+        button.classList.add('active');
       }
-      existing.src = img.src;
-    }
 
-    function removeBackground() {
-      if (!loadedImage) { setImgStatus('ERROR', 'no image loaded'); return; }
-      setImgStatus('BUSY', 'processing...');
-      setTimeout(function () {
-        try {
-          const c = document.createElement('canvas');
-          c.width = loadedImage.naturalWidth;
-          c.height = loadedImage.naturalHeight;
-          const ctx = c.getContext('2d');
-          ctx.drawImage(loadedImage, 0, 0);
-          const data = ctx.getImageData(0, 0, c.width, c.height);
-          const d = data.data;
-          const T = 235;
-          for (let i = 0; i < d.length; i += 4) {
-            if (d[i] >= T && d[i + 1] >= T && d[i + 2] >= T) d[i + 3] = 0;
+      /* ------------------------------------------------------------------ */
+      /*  Image tab                                                           */
+      /* ------------------------------------------------------------------ */
+
+      /**
+       * Return true if the given File is a recognised image type.
+       * @param {File|null} file
+       * @returns {boolean}
+       */
+      function isImageFile(file) {
+        if (!file) return false;
+        if (file.type && file.type.startsWith('image/')) return true;
+        return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(file.name || '');
+      }
+
+      /**
+       * Load a File into loadedImage and update the preview.
+       * @param {File|null} file
+       */
+      function loadSelectedImage(file) {
+        if (!file) { setImgStatus('WARN', 'no file selected'); return; }
+        if (!isImageFile(file)) { setImgStatus('ERROR', 'file is not an image'); return; }
+        document.getElementById('file-name').textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          const img = new Image();
+          img.onload = function () {
+            loadedImage = img;
+            bgRemoved = false;
+            preview.classList.remove('transparent-mode');
+            renderPreview(img);
+            setImgStatus('OK', 'image loaded ' + img.naturalWidth + 'x' + img.naturalHeight);
+          };
+          img.onerror = function () { setImgStatus('ERROR', 'could not decode image'); };
+          img.src = ev.target.result;
+        };
+        reader.onerror = function () { setImgStatus('ERROR', 'read failed'); };
+        reader.readAsDataURL(file);
+      }
+
+      // Single event listener — 'change' covers all browsers and avoids
+      // double-firing on browsers that also raise 'input' on file inputs.
+      fileInput.addEventListener('change', function (e) {
+        loadSelectedImage(e.target.files && e.target.files[0]);
+      });
+
+      /**
+       * Render an HTMLImageElement into the preview container.
+       * @param {HTMLImageElement} img
+       */
+      function renderPreview(img) {
+        if (placeholder) placeholder.style.display = 'none';
+        let existing = preview.querySelector('img.preview-img');
+        if (!existing) {
+          existing = document.createElement('img');
+          existing.className = 'preview-img';
+          existing.style.maxWidth = '100%';
+          existing.style.maxHeight = '100%';
+          existing.style.objectFit = 'contain';
+          preview.appendChild(existing);
+        }
+        existing.src = img.src;
+      }
+
+      /**
+       * Remove near-white background pixels from loadedImage by setting their
+       * alpha channel to 0.  Uses CONFIG.BG_REMOVAL_THRESHOLD as the per-channel
+       * minimum value that classifies a pixel as background.
+       */
+      function removeBackground() {
+        if (!loadedImage) { setImgStatus('ERROR', 'no image loaded'); return; }
+        setImgStatus('BUSY', 'processing...');
+        setTimeout(function () {
+          try {
+            const c = document.createElement('canvas');
+            c.width  = loadedImage.naturalWidth;
+            c.height = loadedImage.naturalHeight;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(loadedImage, 0, 0);
+            const data = ctx.getImageData(0, 0, c.width, c.height);
+            const d = data.data;
+            const T = CONFIG.BG_REMOVAL_THRESHOLD;
+            for (let i = 0; i < d.length; i += 4) {
+              if (d[i] >= T && d[i + 1] >= T && d[i + 2] >= T) d[i + 3] = 0;
+            }
+            ctx.putImageData(data, 0, 0);
+            const out = new Image();
+            out.onload = function () {
+              loadedImage = out;
+              bgRemoved = true;
+              preview.classList.add('transparent-mode');
+              renderPreview(out);
+              setImgStatus('OK', 'background removed (transparent PNG-ready)');
+            };
+            out.src = c.toDataURL('image/png');
+          } catch (err) {
+            setImgStatus('ERROR', 'processing failed');
           }
-          ctx.putImageData(data, 0, 0);
-          const out = new Image();
-          out.onload = function () {
-            loadedImage = out;
-            bgRemoved = true;
-            preview.classList.add('transparent-mode');
-            renderPreview(out);
-            setImgStatus('OK', 'background removed (transparent PNG-ready)');
-          };
-          out.src = c.toDataURL('image/png');
-        } catch (err) {
-          setImgStatus('ERROR', 'processing failed');
-        }
-      }, 30);
-    }
-
-    async function triggerSaveFile(blob, suggestedName, mimeType) {
-      if (window.showSaveFilePicker) {
-        try {
-          const ext = mimeType === 'text/csv' ? '.csv' : mimeType === 'image/png' ? '.png' : mimeType === 'image/jpeg' ? '.jpeg' : '.stl';
-          const options = {
-            suggestedName: suggestedName,
-            types: [{ description: mimeType, accept: { [mimeType]: [ext] } }]
-          };
-          const handle = await window.showSaveFilePicker(options);
-          const writable = await handle.createWritable();
-          await writable.write(blob);
-          await writable.close();
-          return true;
-        } catch (err) {
-          if (err.name === 'AbortError') throw new Error('Save cancelled by user');
-        }
+        }, 30);
       }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = suggestedName;
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-      return false;
-    }
 
-    function getInitials() {
-      const input = document.getElementById('user-initials');
-      return (input && input.value.trim()) ? input.value.trim().toUpperCase() : '';
-    }
-
-    function exportImageSync(fmt) {
-      if (!loadedImage) { setImgStatus('ERROR', 'no image to export'); return; }
-      const res = document.getElementById('res-select').value.split('x');
-      const W = parseInt(res[0], 10), H = parseInt(res[1], 10);
-      const c = document.createElement('canvas');
-      c.width = W;
-      c.height = H;
-      const ctx = c.getContext('2d');
-      if (fmt === 'jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); }
-      const ir = loadedImage.naturalWidth / loadedImage.naturalHeight;
-      const cr = W / H;
-      let dw, dh;
-      if (ir > cr) { dw = W; dh = W / ir; } else { dh = H; dw = H * ir; }
-      ctx.drawImage(loadedImage, (W - dw) / 2, (H - dh) / 2, dw, dh);
-      const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
-      setImgStatus('BUSY', 'exporting file...');
-      const initials = getInitials();
-      const prefix = initials ? initials + '_' : '';
-      const filename = prefix + 'export_' + W + 'x' + H + '.' + fmt;
-      c.toBlob(async function (blob) {
-        if (!blob) { setImgStatus('ERROR', 'failed to generate blob'); return; }
-        try {
-          const usedPicker = await triggerSaveFile(blob, filename, mime);
-          setImgStatus('OK', usedPicker ? 'saved as ' + filename : 'download started: ' + filename);
-        } catch (err) {
-          setImgStatus('ERROR', err.message || 'save blocked');
+      /**
+       * Persist a Blob to disk, preferring the File System Access API
+       * (`showSaveFilePicker`) with an <a download> fallback.
+       * @param {Blob} blob
+       * @param {string} suggestedName
+       * @param {string} mimeType
+       * @returns {Promise<boolean>} Resolves to true if the picker was used.
+       */
+      async function triggerSaveFile(blob, suggestedName, mimeType) {
+        if (window.showSaveFilePicker) {
+          try {
+            const ext = mimeType === 'text/csv' ? '.csv'
+                      : mimeType === 'image/png' ? '.png'
+                      : mimeType === 'image/jpeg' ? '.jpeg'
+                      : '.stl';
+            const options = {
+              suggestedName: suggestedName,
+              types: [{ description: mimeType, accept: { [mimeType]: [ext] } }],
+            };
+            const handle = await window.showSaveFilePicker(options);
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return true;
+          } catch (err) {
+            if (err.name === 'AbortError') throw new Error('Save cancelled by user');
+          }
         }
-      }, mime, fmt === 'jpeg' ? 0.92 : undefined);
-    }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = suggestedName;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        return false;
+      }
 
-    function addSampleRow() {
-      sampleN += 1;
-      const id = String(1000 + sampleN);
-      const line = 'ITEM-' + id + ',component_' + sampleN + ',OK,' + (Math.round(Math.random() * 900) / 10);
-      area.value = (area.value ? area.value.replace(/\s*$/, '') + '\n' : '') + line;
-      setDataStatus('OK', 'row appended');
-    }
+      /** @returns {string} Uppercased operator initials, or empty string. */
+      function getInitials() {
+        const input = document.getElementById('user-initials');
+        return (input && input.value.trim()) ? input.value.trim().toUpperCase() : '';
+      }
 
-    function clearData() {
-      area.value = '';
-      setDataStatus('OK', 'buffer cleared');
-    }
+      /**
+       * Rescale loadedImage to the selected output resolution and trigger download.
+       * @param {'png'|'jpeg'} fmt
+       */
+      function exportImageSync(fmt) {
+        if (!loadedImage) { setImgStatus('ERROR', 'no image to export'); return; }
+        const res = document.getElementById('res-select').value.split('x');
+        const W = parseInt(res[0], 10), H = parseInt(res[1], 10);
+        const c = document.createElement('canvas');
+        c.width  = W;
+        c.height = H;
+        const ctx = c.getContext('2d');
+        if (fmt === 'jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H); }
+        const ir = loadedImage.naturalWidth / loadedImage.naturalHeight;
+        const cr = W / H;
+        let dw, dh;
+        if (ir > cr) { dw = W; dh = W / ir; } else { dh = H; dw = H * ir; }
+        ctx.drawImage(loadedImage, (W - dw) / 2, (H - dh) / 2, dw, dh);
+        const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/png';
+        setImgStatus('BUSY', 'exporting file...');
+        const initials = getInitials();
+        const prefix = initials ? initials + '_' : '';
+        const filename = prefix + 'export_' + W + 'x' + H + '.' + fmt;
+        c.toBlob(async function (blob) {
+          if (!blob) { setImgStatus('ERROR', 'failed to generate blob'); return; }
+          try {
+            const usedPicker = await triggerSaveFile(blob, filename, mime);
+            setImgStatus('OK', usedPicker ? 'saved as ' + filename : 'download started: ' + filename);
+          } catch (err) {
+            setImgStatus('ERROR', err.message || 'save blocked');
+          }
+        }, mime, fmt === 'jpeg' ? 0.92 : undefined);
+      }
 
-    function exportCsvSync() {
-      const raw = area.value.trim();
-      if (!raw) { setDataStatus('ERROR', 'no data to export'); return; }
-      const lines = raw.split(/\r?\n/).filter(function (l) { return l.trim() !== ''; });
-      const csv = lines.map(function (line) {
-        const cells = line.split(',').map(function (cell) {
-          const v = cell.trim();
-          if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
-          return v;
+      /* ------------------------------------------------------------------ */
+      /*  Data tab                                                            */
+      /* ------------------------------------------------------------------ */
+
+      /** Append a synthetic sample row to the data textarea. */
+      function addSampleRow() {
+        sampleN += 1;
+        const id   = String(1000 + sampleN);
+        const line = 'ITEM-' + id + ',component_' + sampleN + ',OK,' + (Math.round(Math.random() * 900) / 10);
+        area.value = (area.value ? area.value.replace(/\s*$/, '') + '\n' : '') + line;
+        setDataStatus('OK', 'row appended');
+      }
+
+      /** Clear the data textarea. */
+      function clearData() {
+        area.value = '';
+        setDataStatus('OK', 'buffer cleared');
+      }
+
+      /**
+       * Parse the textarea content as comma-separated rows and trigger a CSV
+       * download.  Values containing commas, quotes, or newlines are RFC 4180
+       * quoted.
+       */
+      function exportCsvSync() {
+        const raw = area.value.trim();
+        if (!raw) { setDataStatus('ERROR', 'no data to export'); return; }
+        const lines = raw.split(/\r?\n/).filter(function (l) { return l.trim() !== ''; });
+        const csv = lines.map(function (line) {
+          const cells = line.split(',').map(function (cell) {
+            const v = cell.trim();
+            if (/[",\n]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+            return v;
+          });
+          return cells.join(',');
+        }).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const initials = getInitials();
+        const prefix = initials ? initials + '_' : '';
+        const filename = prefix + 'data_export.csv';
+        setDataStatus('BUSY', 'exporting csv...');
+        triggerSaveFile(blob, filename, 'text/csv').then(function (usedPicker) {
+          setDataStatus('OK', usedPicker ? 'saved as ' + filename : 'download started: ' + filename);
+        }).catch(function (err) {
+          setDataStatus('ERROR', err.message || 'save blocked');
         });
-        return cells.join(',');
-      }).join('\r\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const initials = getInitials();
-      const prefix = initials ? initials + '_' : '';
-      const filename = prefix + 'data_export.csv';
-      setDataStatus('BUSY', 'exporting csv...');
-      triggerSaveFile(blob, filename, 'text/csv').then(function (usedPicker) {
-        setDataStatus('OK', usedPicker ? 'saved as ' + filename : 'download started: ' + filename);
-      }).catch(function (err) {
-        setDataStatus('ERROR', err.message || 'save blocked');
-      });
-    }
-
-    function convertLength(source) {
-      const inVal = parseFloat(document.getElementById('conv-in').value) || 0;
-      const mmVal = parseFloat(document.getElementById('conv-mm').value) || 0;
-      const ftVal = parseFloat(document.getElementById('conv-ft').value) || 0;
-      const mVal = parseFloat(document.getElementById('conv-m').value) || 0;
-      if (source === 'in') document.getElementById('conv-mm').value = (inVal * 25.4).toFixed(3);
-      if (source === 'mm') document.getElementById('conv-in').value = (mmVal / 25.4).toFixed(4);
-      if (source === 'ft') document.getElementById('conv-m').value = (ftVal * 0.3048).toFixed(4);
-      if (source === 'm') document.getElementById('conv-ft').value = (mVal / 0.3048).toFixed(4);
-    }
-
-    function convertTemp(source) {
-      const cVal = parseFloat(document.getElementById('conv-c').value);
-      const fVal = parseFloat(document.getElementById('conv-f').value);
-      if (source === 'c' && !isNaN(cVal)) document.getElementById('conv-f').value = ((cVal * 9 / 5) + 32).toFixed(2);
-      if (source === 'f' && !isNaN(fVal)) document.getElementById('conv-c').value = ((fVal - 32) * 5 / 9).toFixed(2);
-    }
-
-    function convertWeight(source) {
-      const lbVal = parseFloat(document.getElementById('conv-lb').value) || 0;
-      const kgVal = parseFloat(document.getElementById('conv-kg').value) || 0;
-      if (source === 'lb') document.getElementById('conv-kg').value = (lbVal * 0.453592).toFixed(3);
-      if (source === 'kg') document.getElementById('conv-lb').value = (kgVal / 0.453592).toFixed(3);
-    }
-
-    function swapConversion(type) {
-      if (type === 'length') {
-        const a = document.getElementById('conv-in').value;
-        const b = document.getElementById('conv-mm').value;
-        document.getElementById('conv-in').value = b;
-        document.getElementById('conv-mm').value = a;
-      } else if (type === 'feet-m') {
-        const a = document.getElementById('conv-ft').value;
-        const b = document.getElementById('conv-m').value;
-        document.getElementById('conv-ft').value = b;
-        document.getElementById('conv-m').value = a;
-      } else if (type === 'temp') {
-        const a = document.getElementById('conv-c').value;
-        const b = document.getElementById('conv-f').value;
-        document.getElementById('conv-c').value = b;
-        document.getElementById('conv-f').value = a;
-      } else if (type === 'weight') {
-        const a = document.getElementById('conv-lb').value;
-        const b = document.getElementById('conv-kg').value;
-        document.getElementById('conv-lb').value = b;
-        document.getElementById('conv-kg').value = a;
       }
-    }
 
-    function fileBaseName(name) {
-      return (name || 'converted').replace(/\.[^/.]+$/, '');
-    }
+      /* ------------------------------------------------------------------ */
+      /*  Conversion tab                                                      */
+      /* ------------------------------------------------------------------ */
 
-    function extFromName(name) {
-      const m = (name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
-      return m ? m[1] : '';
-    }
-
-    function detectCadFormatFromExt(ext) {
-      if (ext === 'obj') return 'obj';
-      if (ext === 'stl') return 'stl';
-      if (ext === 'dxf') return 'dxf';
-      if (ext === 'dwg') return 'dwg';
-      if (ext === 'step' || ext === 'stp') return 'step';
-      if (ext === 'iges' || ext === 'igs') return 'iges';
-      return '';
-    }
-
-    function updateCadTargets() {
-      const from = document.getElementById('cad-from-format').value;
-      const toSelect = document.getElementById('cad-to-format');
-      const info = document.getElementById('cad-target-info');
-      const targets = cadTargetMap[from] || [];
-      toSelect.innerHTML = '';
-      targets.forEach(function (fmt) {
-        const opt = document.createElement('option');
-        opt.value = fmt;
-        opt.textContent = fmt.toUpperCase();
-        toSelect.appendChild(opt);
-      });
-      info.textContent = targets.length
-        ? 'Selectable target formats for ' + from.toUpperCase() + ': ' + targets.map(function (x) { return x.toUpperCase(); }).join(', ')
-        : 'No target formats configured for this source format.';
-    }
-
-    cadFileInput.addEventListener('change', function (e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) { setCadStatus('WARN', 'no file selected'); return; }
-      cadLoadedFile = file;
-      document.getElementById('cad-file-name').textContent = file.name;
-      const fmt = detectCadFormatFromExt(extFromName(file.name));
-      if (fmt) {
-        document.getElementById('cad-from-format').value = fmt;
-        updateCadTargets();
+      /**
+       * Bidirectional length conversion (in ↔ mm, ft ↔ m).
+       * Conversion factors per ISO 1000:1992 (exact).
+       * @param {'in'|'mm'|'ft'|'m'} source - which field was edited
+       */
+      function convertLength(source) {
+        const inVal = parseFloat(document.getElementById('conv-in').value) || 0;
+        const mmVal = parseFloat(document.getElementById('conv-mm').value) || 0;
+        const ftVal = parseFloat(document.getElementById('conv-ft').value) || 0;
+        const mVal  = parseFloat(document.getElementById('conv-m').value)  || 0;
+        const { IN_TO_MM, FT_TO_M } = CONFIG.CONVERSION;
+        if (source === 'in') document.getElementById('conv-mm').value = (inVal * IN_TO_MM).toFixed(3);
+        if (source === 'mm') document.getElementById('conv-in').value = (mmVal / IN_TO_MM).toFixed(4);
+        if (source === 'ft') document.getElementById('conv-m').value  = (ftVal * FT_TO_M).toFixed(4);
+        if (source === 'm')  document.getElementById('conv-ft').value = (mVal  / FT_TO_M).toFixed(4);
       }
-      setCadStatus('OK', 'file loaded: ' + file.name);
-    });
 
-    function parseObjTriangles(text) {
-      const verts = [];
-      const tris = [];
-      const lines = text.split(/\r?\n/);
-      lines.forEach(function (line) {
-        const t = line.trim();
-        if (!t) return;
-        if (t.startsWith('v ')) {
-          const p = t.split(/\s+/);
-          const x = parseFloat(p[1]);
-          const y = parseFloat(p[2]);
-          const z = parseFloat(p[3]);
-          if (!isNaN(x) && !isNaN(y) && !isNaN(z)) verts.push([x, y, z]);
-        } else if (t.startsWith('f ')) {
-          const f = t.split(/\s+/).slice(1).map(function (part) {
-            const idx = parseInt(part.split('/')[0], 10);
-            return idx > 0 ? idx - 1 : idx;
-          }).filter(function (idx) { return !isNaN(idx); });
-          for (let i = 1; i + 1 < f.length; i++) {
-            const a = verts[f[0]];
-            const b = verts[f[i]];
-            const c = verts[f[i + 1]];
-            if (a && b && c) tris.push([a, b, c]);
+      /**
+       * Bidirectional temperature conversion (°C ↔ °F).
+       * Formula: °F = °C × 9/5 + 32  (ISO 1000, exact by definition).
+       * @param {'c'|'f'} source
+       */
+      function convertTemp(source) {
+        const cVal = parseFloat(document.getElementById('conv-c').value);
+        const fVal = parseFloat(document.getElementById('conv-f').value);
+        if (source === 'c' && !isNaN(cVal)) document.getElementById('conv-f').value = ((cVal * 9 / 5) + 32).toFixed(2);
+        if (source === 'f' && !isNaN(fVal)) document.getElementById('conv-c').value = ((fVal - 32) * 5 / 9).toFixed(2);
+      }
+
+      /**
+       * Bidirectional mass conversion (lb ↔ kg).
+       * 1 lb = 0.45359237 kg exactly (ISO 1000).
+       * @param {'lb'|'kg'} source
+       */
+      function convertWeight(source) {
+        const lbVal = parseFloat(document.getElementById('conv-lb').value) || 0;
+        const kgVal = parseFloat(document.getElementById('conv-kg').value) || 0;
+        const { LB_TO_KG } = CONFIG.CONVERSION;
+        if (source === 'lb') document.getElementById('conv-kg').value = (lbVal * LB_TO_KG).toFixed(3);
+        if (source === 'kg') document.getElementById('conv-lb').value = (kgVal / LB_TO_KG).toFixed(3);
+      }
+
+      /**
+       * Swap the values in a converter pair.
+       * @param {'length'|'feet-m'|'temp'|'weight'} type
+       */
+      function swapConversion(type) {
+        function swap(idA, idB) {
+          const a = document.getElementById(idA).value;
+          const b = document.getElementById(idB).value;
+          document.getElementById(idA).value = b;
+          document.getElementById(idB).value = a;
+        }
+        if (type === 'length')  swap('conv-in', 'conv-mm');
+        if (type === 'feet-m')  swap('conv-ft', 'conv-m');
+        if (type === 'temp')    swap('conv-c',  'conv-f');
+        if (type === 'weight')  swap('conv-lb', 'conv-kg');
+      }
+
+      /* ------------------------------------------------------------------ */
+      /*  CAD tab                                                             */
+      /* ------------------------------------------------------------------ */
+
+      /**
+       * Strip the extension from a filename.
+       * @param {string} name
+       * @returns {string}
+       */
+      function fileBaseName(name) {
+        return (name || 'converted').replace(/\.[^/.]+$/, '');
+      }
+
+      /**
+       * Return the lowercase extension from a filename (without the dot).
+       * @param {string} name
+       * @returns {string}
+       */
+      function extFromName(name) {
+        const m = (name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+        return m ? m[1] : '';
+      }
+
+      /**
+       * Map a file extension to a recognised CAD format identifier.
+       * @param {string} ext
+       * @returns {string}
+       */
+      function detectCadFormatFromExt(ext) {
+        if (ext === 'obj')  return 'obj';
+        if (ext === 'stl')  return 'stl';
+        if (ext === 'dxf')  return 'dxf';
+        if (ext === 'dwg')  return 'dwg';
+        if (ext === 'step' || ext === 'stp')  return 'step';
+        if (ext === 'iges' || ext === 'igs')  return 'iges';
+        return '';
+      }
+
+      /**
+       * Repopulate the target-format select and info panel based on the
+       * currently selected source format.
+       */
+      function updateCadTargets() {
+        const from     = document.getElementById('cad-from-format').value;
+        const toSelect = document.getElementById('cad-to-format');
+        const info     = document.getElementById('cad-target-info');
+        const targets  = cadTargetMap[from] || [];
+        toSelect.innerHTML = '';
+        targets.forEach(function (fmt) {
+          const opt = document.createElement('option');
+          opt.value = fmt;
+          opt.textContent = fmt.toUpperCase();
+          toSelect.appendChild(opt);
+        });
+        info.textContent = targets.length
+          ? 'Selectable target formats for ' + from.toUpperCase() + ': ' + targets.map(function (x) { return x.toUpperCase(); }).join(', ')
+          : 'No target formats configured for this source format.';
+      }
+
+      cadFileInput.addEventListener('change', function (e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) { setCadStatus('WARN', 'no file selected'); return; }
+        cadLoadedFile = file;
+        document.getElementById('cad-file-name').textContent = file.name;
+        const fmt = detectCadFormatFromExt(extFromName(file.name));
+        if (fmt) {
+          document.getElementById('cad-from-format').value = fmt;
+          updateCadTargets();
+        }
+        setCadStatus('OK', 'file loaded: ' + file.name);
+      });
+
+      /**
+       * Parse an OBJ text into an array of triangles.
+       * Each triangle is [[x0,y0,z0],[x1,y1,z1],[x2,y2,z2]].
+       * @param {string} text
+       * @returns {Array}
+       */
+      function parseObjTriangles(text) {
+        const verts = [];
+        const tris  = [];
+        const lines = text.split(/\r?\n/);
+        lines.forEach(function (line) {
+          const t = line.trim();
+          if (!t) return;
+          if (t.startsWith('v ')) {
+            const p = t.split(/\s+/);
+            const x = parseFloat(p[1]);
+            const y = parseFloat(p[2]);
+            const z = parseFloat(p[3]);
+            if (!isNaN(x) && !isNaN(y) && !isNaN(z)) verts.push([x, y, z]);
+          } else if (t.startsWith('f ')) {
+            const f = t.split(/\s+/).slice(1).map(function (part) {
+              const idx = parseInt(part.split('/')[0], 10);
+              return idx > 0 ? idx - 1 : idx;
+            }).filter(function (idx) { return !isNaN(idx); });
+            for (let i = 1; i + 1 < f.length; i++) {
+              const a = verts[f[0]];
+              const b = verts[f[i]];
+              const c = verts[f[i + 1]];
+              if (a && b && c) tris.push([a, b, c]);
+            }
           }
-        }
-      });
-      return tris;
-    }
+        });
+        return tris;
+      }
 
-    function trisToAsciiStl(name, triangles) {
-      const safeName = (name || 'mesh').replace(/[^a-zA-Z0-9_-]+/g, '_');
-      const out = ['solid ' + safeName];
-      triangles.forEach(function (tri) {
-        out.push('  facet normal 0 0 0');
-        out.push('    outer loop');
-        out.push('      vertex ' + tri[0][0] + ' ' + tri[0][1] + ' ' + tri[0][2]);
-        out.push('      vertex ' + tri[1][0] + ' ' + tri[1][1] + ' ' + tri[1][2]);
-        out.push('      vertex ' + tri[2][0] + ' ' + tri[2][1] + ' ' + tri[2][2]);
-        out.push('    endloop');
-        out.push('  endfacet');
-      });
-      out.push('endsolid ' + safeName);
-      return out.join('\n');
-    }
+      /**
+       * Serialise an array of triangles to ASCII STL.
+       * @param {string} name  - solid name (sanitised to [a-zA-Z0-9_-])
+       * @param {Array} triangles
+       * @returns {string}
+       */
+      function trisToAsciiStl(name, triangles) {
+        const safeName = (name || 'mesh').replace(/[^a-zA-Z0-9_-]+/g, '_');
+        const out = ['solid ' + safeName];
+        triangles.forEach(function (tri) {
+          out.push('  facet normal 0 0 0');
+          out.push('    outer loop');
+          out.push('      vertex ' + tri[0][0] + ' ' + tri[0][1] + ' ' + tri[0][2]);
+          out.push('      vertex ' + tri[1][0] + ' ' + tri[1][1] + ' ' + tri[1][2]);
+          out.push('      vertex ' + tri[2][0] + ' ' + tri[2][1] + ' ' + tri[2][2]);
+          out.push('    endloop');
+          out.push('  endfacet');
+        });
+        out.push('endsolid ' + safeName);
+        return out.join('\n');
+      }
 
-    async function convertCadFile() {
-      if (!cadLoadedFile) { setCadStatus('ERROR', 'load a cad file first'); return; }
-      const from = document.getElementById('cad-from-format').value;
-      const to = document.getElementById('cad-to-format').value;
-      if (!to) { setCadStatus('ERROR', 'select a target format'); return; }
-      const base = fileBaseName(cadLoadedFile.name);
-      const outName = base + '.' + to;
-      setCadStatus('BUSY', 'converting...');
+      /**
+       * Execute the CAD conversion selected by the user and download the result.
+       * Currently supports OBJ → STL and STL → STL in-browser; all other
+       * combinations are informational-only.
+       */
+      async function convertCadFile() {
+        if (!cadLoadedFile) { setCadStatus('ERROR', 'load a cad file first'); return; }
+        const from = document.getElementById('cad-from-format').value;
+        const to   = document.getElementById('cad-to-format').value;
+        if (!to) { setCadStatus('ERROR', 'select a target format'); return; }
+        const base    = fileBaseName(cadLoadedFile.name);
+        const outName = base + '.' + to;
+        setCadStatus('BUSY', 'converting...');
 
-      try {
-        if (to !== 'stl') {
-          setCadStatus('ERROR', 'only STL output is executable in-browser in this build');
-          return;
-        }
-
-        if (from === 'stl') {
-          const buf = await cadLoadedFile.arrayBuffer();
-          const blob = new Blob([buf], { type: 'model/stl' });
-          await triggerSaveFile(blob, outName, 'model/stl');
-          setCadStatus('OK', 'converted and saved: ' + outName);
-          return;
-        }
-
-        if (from === 'obj') {
-          const text = await cadLoadedFile.text();
-          const triangles = parseObjTriangles(text);
-          if (!triangles.length) {
-            setCadStatus('ERROR', 'OBJ parse failed or no faces found');
+        try {
+          if (to !== 'stl') {
+            setCadStatus('ERROR', 'only STL output is executable in-browser in this build');
             return;
           }
-          const stl = trisToAsciiStl(base, triangles);
-          const blob = new Blob([stl], { type: 'model/stl' });
-          await triggerSaveFile(blob, outName, 'model/stl');
-          setCadStatus('OK', 'converted and saved: ' + outName);
+
+          if (from === 'stl') {
+            const buf  = await cadLoadedFile.arrayBuffer();
+            const blob = new Blob([buf], { type: 'model/stl' });
+            await triggerSaveFile(blob, outName, 'model/stl');
+            setCadStatus('OK', 'converted and saved: ' + outName);
+            return;
+          }
+
+          if (from === 'obj') {
+            const text      = await cadLoadedFile.text();
+            const triangles = parseObjTriangles(text);
+            if (!triangles.length) {
+              setCadStatus('ERROR', 'OBJ parse failed or no faces found');
+              return;
+            }
+            const stl  = trisToAsciiStl(base, triangles);
+            const blob = new Blob([stl], { type: 'model/stl' });
+            await triggerSaveFile(blob, outName, 'model/stl');
+            setCadStatus('OK', 'converted and saved: ' + outName);
+            return;
+          }
+
+          setCadStatus('ERROR', from.toUpperCase() + ' conversion is informational-only in-browser');
+        } catch (err) {
+          setCadStatus('ERROR', err.message || 'conversion failed');
+        }
+      }
+
+      /* ------------------------------------------------------------------ */
+      /*  Date / Time tab                                                     */
+      /* ------------------------------------------------------------------ */
+
+      /** Refresh the live clock display. Called on 1 s interval. */
+      function updateCurrentDate() {
+        const now     = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        document.getElementById('current-date-display').textContent = dateStr;
+        document.getElementById('current-time-display').textContent = timeStr;
+        document.getElementById('current-datetime-copy').textContent = dateStr + ' ' + timeStr;
+      }
+
+      /** Compute and display the number of calendar days between two date inputs. */
+      function calculateDaysBetween() {
+        const from   = document.getElementById('date-from').value;
+        const to     = document.getElementById('date-to').value;
+        const result = document.getElementById('days-result');
+        if (!from || !to) { result.textContent = 'select two dates'; return; }
+        const d1   = new Date(from);
+        const d2   = new Date(to);
+        const days = Math.abs(Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)));
+        result.textContent = days + ' days between dates';
+      }
+
+      /** Compute and display the date obtained by adding an offset (days) to a base date. */
+      function addDaysToDate() {
+        const base   = document.getElementById('date-base').value;
+        const offset = parseInt(document.getElementById('days-offset').value, 10) || 0;
+        const result = document.getElementById('offset-result');
+        if (!base) { result.textContent = 'select date'; return; }
+        const d = new Date(base);
+        d.setDate(d.getDate() + offset);
+        const resultStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        result.textContent = resultStr + ' (' + (offset >= 0 ? '+' : '') + offset + ' days)';
+      }
+
+      /* ------------------------------------------------------------------ */
+      /*  Clipboard helper                                                    */
+      /* ------------------------------------------------------------------ */
+
+      /**
+       * Copy the text content of an element to the clipboard.
+       * @param {string} elementId
+       */
+      function copyOutput(elementId) {
+        const el   = document.getElementById(elementId);
+        const text = (el && (el.innerText || el.textContent || '')).trim();
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () {
+            setDataStatus('OK', 'copied to clipboard');
+          }).catch(function () {
+            fallbackCopy(text);
+          });
           return;
         }
-
-        setCadStatus('ERROR', from.toUpperCase() + ' conversion is informational-only in-browser');
-      } catch (err) {
-        setCadStatus('ERROR', err.message || 'conversion failed');
+        fallbackCopy(text);
       }
-    }
 
-    function updateCurrentDate() {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
-      const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      document.getElementById('current-date-display').textContent = dateStr;
-      document.getElementById('current-time-display').textContent = timeStr;
-      document.getElementById('current-datetime-copy').textContent = dateStr + ' ' + timeStr;
-    }
-
-    function calculateDaysBetween() {
-      const from = document.getElementById('date-from').value;
-      const to = document.getElementById('date-to').value;
-      const result = document.getElementById('days-result');
-      if (!from || !to) {
-        result.textContent = 'select two dates';
-        return;
+      /**
+       * Fallback clipboard copy using a temporary off-screen textarea.
+       * @param {string} text
+       */
+      function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
       }
-      const d1 = new Date(from);
-      const d2 = new Date(to);
-      const days = Math.abs(Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)));
-      result.textContent = days + ' days between dates';
-    }
 
-    function addDaysToDate() {
-      const base = document.getElementById('date-base').value;
-      const offset = parseInt(document.getElementById('days-offset').value, 10) || 0;
-      const result = document.getElementById('offset-result');
-      if (!base) {
-        result.textContent = 'select date';
-        return;
-      }
-      const d = new Date(base);
-      d.setDate(d.getDate() + offset);
-      const resultStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-      result.textContent = resultStr + ' (' + (offset >= 0 ? '+' : '') + offset + ' days)';
-    }
+      /* ------------------------------------------------------------------ */
+      /*  Global error boundary                                               */
+      /* ------------------------------------------------------------------ */
 
-    function copyOutput(elementId) {
-      const el = document.getElementById(elementId);
-      const text = (el && (el.innerText || el.textContent || '')).trim();
-      if (!text) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () {
-          setDataStatus('OK', 'copied to clipboard');
-        }).catch(function () {
-          fallbackCopy(text);
-        });
-        return;
-      }
-      fallbackCopy(text);
-    }
+      window.addEventListener('unhandledrejection', function (event) {
+        console.error('[EngUtilConsole] unhandled promise rejection:', event.reason);
+      });
 
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try { document.execCommand('copy'); } catch (e) {}
-      document.body.removeChild(ta);
-    }
+      /* ------------------------------------------------------------------ */
+      /*  Initialisation                                                      */
+      /* ------------------------------------------------------------------ */
 
-    document.addEventListener('DOMContentLoaded', function () {
-      area.value = "id,name,status,value\nITEM-1001,sensor_a,OK,42.5\nITEM-1002,sensor_b,FAIL,0.0";
-      updateCadTargets();
-      updateCurrentDate();
-      setInterval(updateCurrentDate, 1000);
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('date-base').value = today;
-      document.getElementById('date-from').value = today;
-      document.getElementById('date-to').value = today;
-      calculateDaysBetween();
-      addDaysToDate();
-    });
+      document.addEventListener('DOMContentLoaded', function () {
+        area.value = "id,name,status,value\nITEM-1001,sensor_a,OK,42.5\nITEM-1002,sensor_b,FAIL,0.0";
+        updateCadTargets();
+        updateCurrentDate();
+        setInterval(updateCurrentDate, 1000);
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date-base').value = today;
+        document.getElementById('date-from').value = today;
+        document.getElementById('date-to').value   = today;
+        calculateDaysBetween();
+        addDaysToDate();
+      });
+
+      /* ------------------------------------------------------------------ */
+      /*  Public API — expose only what HTML event handlers need             */
+      /* ------------------------------------------------------------------ */
+
+      return {
+        switchTab,
+        removeBackground,
+        exportImageSync,
+        addSampleRow,
+        clearData,
+        exportCsvSync,
+        convertLength,
+        convertTemp,
+        convertWeight,
+        swapConversion,
+        updateCadTargets,
+        convertCadFile,
+        copyOutput,
+      };
+    }());
   </script>
 </body>
 </html>

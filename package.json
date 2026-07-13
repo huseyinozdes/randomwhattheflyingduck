@@ -6,6 +6,6 @@
   "scripts": {
     "lint": "node --check mini_tool_engine_adapter.js",
     "build": "node -e \"console.log('build: no-op for static browser project')\"",
-    "test": "node --test tests/mini_tool_engine_adapter.test.js"
+    "test": "node --test tests/mini_tool_engine_adapter.test.js tests/index_html_script_contract.test.js"
   }
 }
