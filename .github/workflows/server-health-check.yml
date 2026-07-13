@@ -26,7 +26,7 @@ jobs:
         server:
           # ── Add / remove servers here ──────────────────────────────────────
           - name: "Stress Fatigue"
-            url: "https://huseyinozdes.github.io/stress-based-fatigue-analysis"
+            url: "https://stressbasedfatigue.streamlit.app"
             id: stress-fatigue
           - name: "Random Flying Duck"
             url: "https://huseyinozdes.github.io/randomwhattheflyingduck"
