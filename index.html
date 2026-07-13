@@ -676,7 +676,7 @@
         } else if (t.startsWith('f ')) {
           const f = t.split(/\s+/).slice(1).map(function (part) {
             const idx = parseInt(part.split('/')[0], 10);
-            return idx > 0 ? idx - 1 : idx;
+            return idx > 0 ? idx - 1 : verts.length + idx;
           }).filter(function (idx) { return !isNaN(idx); });
           for (let i = 1; i + 1 < f.length; i++) {
             const a = verts[f[0]];
@@ -771,6 +771,11 @@
       result.textContent = days + ' days between dates';
     }
 
+    function parseLocalDate(value) {
+      const parts = value.split('-').map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
     function addDaysToDate() {
       const base = document.getElementById('date-base').value;
       const offset = parseInt(document.getElementById('days-offset').value, 10) || 0;
@@ -779,7 +784,7 @@
         result.textContent = 'select date';
         return;
       }
-      const d = new Date(base);
+      const d = parseLocalDate(base);
       d.setDate(d.getDate() + offset);
       const resultStr = d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
       result.textContent = resultStr + ' (' + (offset >= 0 ? '+' : '') + offset + ' days)';
