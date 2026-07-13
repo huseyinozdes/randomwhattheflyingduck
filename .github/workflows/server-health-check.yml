@@ -1,0 +1,292 @@
+name: Production Server Health Check
+
+# Runs after every merge to main and checks the health of all production servers.
+# To add a new server: add an entry to the matrix below (jobs.health-check.strategy.matrix.server).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  statuses: write
+  pull-requests: write
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Per-server health check  (one parallel job per server)
+  # ─────────────────────────────────────────────────────────────────────────────
+  health-check:
+    name: "Health Check: ${{ matrix.server.name }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        server:
+          # ── Add / remove servers here ──────────────────────────────────────
+          - name: "Stress Fatigue"
+            url: "https://stressbasedfatigue.streamlit.app"
+            id: stress-fatigue
+          - name: "Random Flying Duck"
+            url: "https://huseyinozdes.github.io/randomwhattheflyingduck"
+            id: random-flying-duck
+          # ──────────────────────────────────────────────────────────────────
+
+    steps:
+      - name: Run health checks
+        id: check
+        shell: bash
+        run: |
+          NAME="${{ matrix.server.name }}"
+          URL="${{ matrix.server.url }}"
+
+          # Strip scheme to get the bare domain (used for SSL probe)
+          DOMAIN="${URL#https://}"
+          DOMAIN="${DOMAIN#http://}"
+          DOMAIN="${DOMAIN%%/*}"
+
+          echo "Checking: $NAME  ($URL)"
+          echo "Domain  : $DOMAIN"
+          echo "---"
+
+          # ── HTTP status + response time ─────────────────────────────────────
+          COOKIE_JAR=$(mktemp)
+          trap 'rm -f "$COOKIE_JAR"' EXIT
+          CURL_OUT=$(curl -o /dev/null -s \
+            -w "%{http_code}|%{time_total}" \
+            --max-time 10 \
+            --connect-timeout 5 \
+            --max-redirs 10 \
+            --location \
+            --cookie-jar "$COOKIE_JAR" \
+            --cookie "$COOKIE_JAR" \
+            "$URL" 2>/dev/null) || CURL_OUT="000|0.000"
+
+          HTTP_CODE="${CURL_OUT%%|*}"
+          RESPONSE_TIME="${CURL_OUT##*|}"
+
+          echo "HTTP status    : $HTTP_CODE"
+          echo "Response time  : ${RESPONSE_TIME}s"
+
+          if [[ "$HTTP_CODE" =~ ^2[0-9]{2}$ ]]; then
+            HTTP_ICON="✅"; HTTP_LABEL="OK ($HTTP_CODE)"; HTTP_OK=true
+          else
+            HTTP_ICON="❌"; HTTP_LABEL="FAIL ($HTTP_CODE)"; HTTP_OK=false
+          fi
+
+          if (( $(echo "$RESPONSE_TIME < 5.0" | bc -l) )); then
+            TIME_ICON="✅"; TIME_LABEL="${RESPONSE_TIME}s"
+          else
+            TIME_ICON="⚠️"; TIME_LABEL="${RESPONSE_TIME}s  ⚡ exceeds 5 s threshold"
+          fi
+
+          # ── SSL certificate expiry ──────────────────────────────────────────
+          SSL_ENDDATE=$(echo | timeout 8 openssl s_client \
+            -servername "$DOMAIN" \
+            -connect "${DOMAIN}:443" 2>/dev/null \
+            | openssl x509 -noout -enddate 2>/dev/null || true)
+
+          if [[ -n "$SSL_ENDDATE" ]]; then
+            EXPIRY_RAW="${SSL_ENDDATE#notAfter=}"
+            EXPIRY_EPOCH=$(date -d "$EXPIRY_RAW" +%s 2>/dev/null || echo 0)
+            NOW_EPOCH=$(date +%s)
+            DAYS_LEFT=$(( (EXPIRY_EPOCH - NOW_EPOCH) / 86400 ))
+
+            echo "SSL expiry     : $EXPIRY_RAW  ($DAYS_LEFT days)"
+
+            if   [[ $DAYS_LEFT -le 0  ]]; then
+              SSL_ICON="❌"; SSL_LABEL="EXPIRED  ($EXPIRY_RAW)"; SSL_OK=false
+            elif [[ $DAYS_LEFT -le 14 ]]; then
+              SSL_ICON="⚠️"; SSL_LABEL="Expiring soon — ${DAYS_LEFT} days  ($EXPIRY_RAW)"; SSL_OK=true
+            else
+              SSL_ICON="✅"; SSL_LABEL="Valid — ${DAYS_LEFT} days remaining"; SSL_OK=true
+            fi
+          else
+            echo "SSL expiry     : could not retrieve certificate"
+            SSL_ICON="⚠️"; SSL_LABEL="Could not verify certificate"; SSL_OK=false
+          fi
+
+          # ── Overall result ──────────────────────────────────────────────────
+          if [[ "$HTTP_OK" == "true" && "$SSL_OK" == "true" ]]; then
+            OVERALL="pass"
+          else
+            OVERALL="fail"
+          fi
+
+          echo "Overall        : $OVERALL"
+
+          # ── Emit output (single-line JSON consumed by the report job) ───────
+          RESULT=$(printf '{"name":"%s","url":"%s","http_icon":"%s","http_label":"%s","time_icon":"%s","time_label":"%s","ssl_icon":"%s","ssl_label":"%s","overall":"%s"}' \
+            "$NAME" "$URL" \
+            "$HTTP_ICON" "$HTTP_LABEL" \
+            "$TIME_ICON" "$TIME_LABEL" \
+            "$SSL_ICON"  "$SSL_LABEL" \
+            "$OVERALL")
+
+          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+          if [[ "$OVERALL" != "pass" ]]; then
+            exit 1
+          fi
+
+      # ── Per-server summary fragment (visible even if the report job is skipped)
+      - name: Write per-server step summary
+        if: always()
+        shell: bash
+        run: |
+          # Parse with python (available on all GitHub-hosted runners)
+          python3 - <<'PYEOF'
+          import json, os, sys
+
+          result_str = os.environ.get("RESULT", "{}")
+          try:
+              r = json.loads(result_str)
+          except json.JSONDecodeError:
+              print("⚠️  Could not parse health-check result.", file=sys.stderr)
+              sys.exit(0)
+
+          icon = "✅" if r.get("overall") == "pass" else "❌"
+
+          lines = [
+              f"## {icon} {r.get('name', 'Server')} — Health Check",
+              "",
+              f"| Check           | Result |",
+              f"|-----------------|--------|",
+              f"| HTTP Status     | {r.get('http_icon','')} {r.get('http_label','')} |",
+              f"| Response Time   | {r.get('time_icon','')} {r.get('time_label','')} |",
+              f"| SSL Certificate | {r.get('ssl_icon','')}  {r.get('ssl_label','')} |",
+              "",
+              f"> URL: {r.get('url','')}",
+              "",
+          ]
+
+          summary_path = os.environ["GITHUB_STEP_SUMMARY"]
+          with open(summary_path, "a") as fh:
+              fh.write("\n".join(lines) + "\n")
+          PYEOF
+        env:
+          RESULT: ${{ steps.check.outputs.result }}
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Aggregate report  (collects all per-server results, updates commit status,
+  # and comments on the merge PR)
+  # ─────────────────────────────────────────────────────────────────────────────
+  report:
+    name: Report Health Check Results
+    runs-on: ubuntu-latest
+    needs: health-check
+    if: always()
+    steps:
+      - name: Collect results and report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const sha = context.sha;
+
+            // ── Gather per-server results from matrix outputs ───────────────
+            // GitHub does not expose matrix outputs directly, so we query the
+            // jobs API for this run and pull the step output from each job.
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRun,
+              { owner, repo, run_id: context.runId, filter: "latest" }
+            );
+
+            const results = [];
+            for (const job of jobs) {
+              if (!job.name.startsWith("Health Check:")) continue;
+              // Fetch steps for this job to get the output via the step log
+              // (The result JSON is echoed to the log by the check step)
+              for (const step of job.steps || []) {
+                if (step.name === "Run health checks") {
+                  // We can't read step outputs from another job via the API,
+                  // so we re-derive the result status from the job conclusion.
+                  const serverName = job.name.replace(/^Health Check:\s*/, "");
+                  results.push({
+                    name: serverName,
+                    conclusion: job.conclusion,   // success | failure | null
+                    jobUrl: job.html_url,
+                  });
+                  break;
+                }
+              }
+            }
+
+            // ── Build markdown table ────────────────────────────────────────
+            const statusIcon = (c) => c === "success" ? "✅" : c === null ? "⏳" : "❌";
+
+            let tableRows = results.map(r =>
+              `| [${r.name}](${r.jobUrl}) | ${statusIcon(r.conclusion)} ${r.conclusion ?? "running"} |`
+            ).join("\n");
+
+            const overallOk  = results.length > 0 &&
+                               results.every(r => r.conclusion === "success");
+            const overallIcon = overallOk ? "✅" : "❌";
+            const overallText = overallOk ? "All servers healthy" : "One or more servers need attention";
+
+            const timestamp = new Date().toISOString();
+            const commitUrl = `${context.serverUrl}/${owner}/${repo}/commit/${sha}`;
+
+            const markdownReport = [
+              `## ${overallIcon} Production Server Health Check`,
+              "",
+              `| Server | Status |`,
+              `|--------|--------|`,
+              tableRows,
+              "",
+              `> **${overallText}**`,
+              `> Commit [\`${sha.slice(0,7)}\`](${commitUrl}) · ${timestamp}`,
+              `> [View full run details](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId})`,
+            ].join("\n");
+
+            // ── Write to Actions run summary ────────────────────────────────
+            await core.summary
+              .addRaw(markdownReport)
+              .write();
+
+            // ── Create commit status ────────────────────────────────────────
+            const statusState = overallOk ? "success" : "failure";
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha,
+              state: statusState,
+              target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              description: overallText.slice(0, 140),
+              context: "production-health-check",
+            });
+            core.info(`Commit status set to: ${statusState}`);
+
+            // ── Comment on merge PR (if any) ────────────────────────────────
+            let prs = [];
+            try {
+              const resp = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: sha,
+              });
+              prs = resp.data.filter(pr => pr.state === "closed" && pr.merged_at);
+            } catch (err) {
+              core.warning(`Could not list PRs for commit: ${err.message}`);
+            }
+
+            if (prs.length > 0) {
+              const pr = prs[0];
+              const commentBody = [
+                markdownReport,
+                "",
+                `---`,
+                `*Posted automatically by the [server-health-check](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}) workflow.*`,
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: commentBody,
+              });
+              core.info(`Commented on PR #${pr.number}`);
+            } else {
+              core.info("No merged PR found for this commit — skipping PR comment.");
+            }
