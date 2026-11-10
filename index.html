@@ -521,7 +521,14 @@
           await writable.close();
           return true;
         } catch (err) {
-          if (err.name === 'AbortError') throw new Error('Save cancelled by user');
+          // showSaveFilePicker() can reject with AbortError not only on a genuine
+          // user cancel, but also when the native dialog simply can't be shown
+          // (window focus loss, OS/enterprise policy, etc. - a known Chromium/Edge
+          // quirk). Treat any failure here as "picker unavailable" and fall back
+          // to a normal download instead of hard-failing the export.
+          if (err && err.name !== 'AbortError') {
+            console.error('showSaveFilePicker failed, falling back to download:', err);
+          }
         }
       }
       const url = URL.createObjectURL(blob);
