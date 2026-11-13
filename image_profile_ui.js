@@ -1,8 +1,9 @@
 "use strict";
 
 const ImageProfileUI = (function () {
+  const expectedVersion = "2026-11-13.3";
   const get = id => document.getElementById("profile-" + id);
-  const fields = ["width", "height", "lock", "threshold", "simplify", "invert", "frame", "frame-width", "frame-height"];
+  const fields = ["width", "height", "lock", "threshold", "simplify", "invert", "quality", "frame", "frame-width", "frame-height"];
   const svg = get("preview"), status = get("status"), download = get("download");
   let image = null, paths = null, timer = null, fileSize = 0;
 
@@ -10,7 +11,12 @@ const ImageProfileUI = (function () {
     paths = null;
     download.disabled = true;
     svg.replaceChildren();
-    status.textContent = message;
+    status.textContent = message + " | exporter " + (ImageProfile.version || "unversioned");
+  }
+  if (fields.some(id => !get(id)) || !get("filename")) {
+    const message = "[ ERROR ] Outdated page layout; hard-refresh the page before exporting.";
+    clear(message);
+    return { setImage() { clear(message); } };
   }
   function number(id) {
     const value = get(id).value;
@@ -28,6 +34,9 @@ const ImageProfileUI = (function () {
     timer = null;
     if (!image) return;
     try {
+      if (ImageProfile.version !== expectedVersion) {
+        throw new Error("Outdated image exporter; hard-refresh the page before exporting.");
+      }
       if (fileSize > 20 * 1024 * 1024 || image.naturalWidth * image.naturalHeight > 20000000 ||
           Math.max(image.naturalWidth, image.naturalHeight) > 8192) {
         throw new Error("Image exceeds the profile limit of 20 MiB, 20 megapixels or 8192 pixels per side.");
@@ -39,7 +48,7 @@ const ImageProfileUI = (function () {
       if (!ctx) throw new Error("Canvas is unavailable.");
       ctx.drawImage(image, 0, 0, width, height);
       const loops = ImageProfile.trace(ctx.getImageData(0, 0, width, height).data, width, height,
-        number("threshold"), get("invert").checked, number("simplify"));
+        number("threshold"), get("invert").checked, number("simplify"), get("quality").checked);
       if (!loops.length) throw new Error("No outlines found; adjust the threshold or invert setting.");
       const imageWidth = number("width"), imageHeight = number("height");
       const frame = get("frame").checked ? { width: number("frame-width"), height: number("frame-height") } : null;
@@ -58,7 +67,8 @@ const ImageProfileUI = (function () {
       svg.replaceChildren(path);
       paths = result;
       download.disabled = false;
-      status.textContent = "[ OK ] " + loops.length + " closed outlines (traced at source " + width + " x " + height + " px)";
+      status.textContent = "[ OK ] " + loops.length + " closed outlines (traced at source " + width + " x " + height + " px) | " +
+        (get("quality").checked ? "safe smoothing" : "pixel boundaries") + " | exporter " + ImageProfile.version;
     } catch (error) {
       clear("[ ERROR ] " + (error.message || "Could not trace image."));
     }
@@ -73,18 +83,36 @@ const ImageProfileUI = (function () {
     if (id === "lock" && get("lock").checked) aspect("width");
     get("threshold-value").textContent = get("threshold").value;
     get("simplify-value").textContent = get("simplify").value;
+    get("simplify").disabled = get("quality").checked;
     schedule();
   }));
-  download.addEventListener("click", function () {
+  download.addEventListener("click", async function () {
     if (!paths) return;
-    const url = URL.createObjectURL(new Blob([ImageProfile.dxf(paths)], { type: "application/dxf" }));
-    const link = document.createElement("a");
-    link.href = url; link.download = "image-profile.dxf";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const stem = get("filename").value.trim().replace(/[. ]+$/, "")
+      .replace(/(?:\.dxf[. ]*)+$/i, "").trim().replace(/[. ]+$/, "") || "image-profile";
+    if (/[<>:"/\\|?*\x00-\x1f]/.test(stem) || /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(stem)) {
+      status.textContent = "[ ERROR ] Choose a file name without reserved characters or device names. | exporter " + ImageProfile.version;
+      return;
+    }
+    try {
+      const blob = new Blob([ImageProfile.dxf(paths)], { type: "application/dxf" });
+      if (typeof triggerSaveFile === "function") {
+        await triggerSaveFile(blob, stem + ".dxf", "application/dxf");
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url; link.download = stem + ".dxf";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      status.textContent = "[ OK ] DXF save requested: " + stem + ".dxf | exporter " + ImageProfile.version;
+    } catch (error) {
+      status.textContent = "[ ERROR ] " + (error.message || "Could not save DXF.") + " | exporter " + ImageProfile.version;
+    }
   });
+  clear("[ IDLE ] load an image to trace");
   return {
     setImage(value, size) {
       image = value;
