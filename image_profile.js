@@ -5,12 +5,13 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.ImageProfile = api;
 })(typeof globalThis === "object" ? globalThis : this, function () {
-  const MAX_PIXELS = 512 * 512;
+  const MAX_PIXELS = 20000000;
   const MAX_EDGES = 100000;
 
   function trace(data, width, height, threshold, invert, tolerance) {
     if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
-        width * height > MAX_PIXELS || !data || data.length !== width * height * 4) {
+        width * height > MAX_PIXELS || Math.max(width, height) > 8192 ||
+        !data || data.length !== width * height * 4) {
       throw new Error("Invalid or oversized raster.");
     }
     if (!Number.isFinite(threshold) || threshold < 0 || threshold > 255 ||
@@ -18,10 +19,13 @@
       throw new Error("Invalid tracing settings.");
     }
     const mask = new Uint8Array(width * height);
+    const cutoff = threshold * 10000 * 255;
     for (let i = 0; i < mask.length; i++) {
-      const j = i * 4, alpha = data[j + 3] / 255;
-      const luminance = (0.2126 * data[j] + 0.7152 * data[j + 1] + 0.0722 * data[j + 2]) * alpha + 255 * (1 - alpha);
-      mask[i] = alpha > 0 && (invert ? luminance > threshold : luminance <= threshold);
+      const j = i * 4, alpha = data[j + 3];
+      // Integer weights avoid misclassifying exact threshold equality.
+      const luminance = (2126 * data[j] + 7152 * data[j + 1] + 722 * data[j + 2]) * alpha +
+        255 * 10000 * (255 - alpha);
+      mask[i] = alpha > 0 && (invert ? luminance > cutoff : luminance <= cutoff);
     }
     const edges = [], outgoing = new Map();
     function add(x1, y1, x2, y2, dir) {
@@ -56,8 +60,22 @@
         candidates.sort((a, b) => ((a.dir - edge.dir + 3) % 4) - ((b.dir - edge.dir + 3) % 4));
         edge = candidates[0];
       } while (true);
-      if (loops.length >= 512) throw new Error("Image has too many contours; simplify the image or adjust the threshold.");
-      loops.push(simplify(points, 0));
+      // A boundary can revisit a corner where a hole touches the exterior.
+      // Split these pinches rather than exporting a self-touching polyline.
+      const active = [], indices = new Map();
+      for (const point of points.concat([points[0]])) {
+        const key = point[1] * (width + 1) + point[0];
+        if (indices.has(key)) {
+          const index = indices.get(key);
+          if (loops.length >= 512) throw new Error("Image has too many contours; simplify the image or adjust the threshold.");
+          loops.push(simplify(active.slice(index), 0));
+          for (let i = index + 1; i < active.length; i++) indices.delete(active[i][1] * (width + 1) + active[i][0]);
+          active.length = index + 1;
+        } else {
+          indices.set(key, active.length);
+          active.push(point);
+        }
+      }
     }
     if (tolerance === 0) return loops;
     const boxes = loops.map(loop => {

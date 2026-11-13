@@ -31,6 +31,17 @@ test("keeps diagonal regions separate and excludes transparent pixels", () => {
   assert.deepEqual(run(["t"], 128, true), []);
 });
 
+test("splits a hole touching the exterior at one corner into simple closed rings", () => {
+  const loops = run(["###", "#.#", ".##"]);
+  assert.equal(loops.length, 2);
+  assert.deepEqual(loops[0], [[1, 2], [2, 2], [2, 1], [1, 1]]);
+  assert.deepEqual(loops[1], [[0, 0], [3, 0], [3, 3], [1, 3], [1, 2], [0, 2]]);
+  assert.deepEqual(run(["###", "#.#", ".##"], 128, false, 3), loops);
+  for (const loop of loops) {
+    assert.equal(new Set(loop.map(point => point.join(","))).size, loop.length);
+  }
+});
+
 test("threshold, inversion and simplification alter traced outlines", () => {
   assert.equal(run(["#."], 128, false).length, 1);
   assert.deepEqual(run(["#."], 128, true)[0], [[1, 0], [2, 0], [2, 1], [1, 1]]);
@@ -50,9 +61,55 @@ test("geometry scales and flips image coordinates and adds a centered frame", ()
 });
 
 test("rejects malformed, oversized and invalid inputs", () => {
-  assert.throws(() => trace(new Uint8Array(4), 513, 513, 128, false, 0), /oversized/);
+  assert.throws(() => trace(new Uint8Array(4), 8193, 1, 128, false, 0), /oversized/);
+  assert.throws(() => trace(new Uint8Array(4), 5000, 5000, 128, false, 0), /oversized/);
   assert.throws(() => run(["#"], 256), /settings/);
   assert.throws(() => geometry([], 1, 1, 0, 1, null), /dimensions/);
   assert.throws(() => geometry([], 1, 1, 10, 10, { width: 9, height: 10 }), /Frame/);
   assert.throws(() => geometry([], 1, 1, Infinity, 10, null), /dimensions/);
+  assert.throws(() => run(Array.from({ length: 33 }, (_, y) =>
+    Array.from({ length: 33 }, (_, x) => (x + y) % 2 ? "." : "#").join(""))), /too many contours/);
+  assert.throws(() => run(Array.from({ length: 225 }, (_, y) =>
+    Array.from({ length: 225 }, (_, x) => (x + y) % 2 ? "." : "#").join(""))), /too many outline edges/);
+});
+
+test("includes exact grayscale thresholds and makes inversion complementary", () => {
+  for (let value = 0; value <= 255; value++) {
+    const pixel = new Uint8ClampedArray([value, value, value, 255]);
+    assert.equal(trace(pixel, 1, 1, value, false, 0).length, 1, `gray ${value} at equality`);
+    assert.equal(trace(pixel, 1, 1, value, true, 0).length, 0, `inverted gray ${value} at equality`);
+    if (value > 0) {
+      assert.equal(trace(pixel, 1, 1, value - 1, false, 0).length, 0);
+      assert.equal(trace(pixel, 1, 1, value - 1, true, 0).length, 1);
+    }
+  }
+  const partial = new Uint8ClampedArray([0, 0, 0, 128]); // Black composited on white is 127.
+  assert.equal(trace(partial, 1, 1, 127, false, 0).length, 1);
+  assert.equal(trace(partial, 1, 1, 126, true, 0).length, 1);
+  assert.deepEqual(trace(new Uint8ClampedArray([0, 0, 0, 0]), 1, 1, 255, false, 0), []);
+});
+
+test("preserves native-resolution one-pixel lines and holes with exact scaled coordinates", () => {
+  const width = 2048, height = 1024;
+  const pixels = new Uint8ClampedArray(width * height * 4).fill(255);
+  for (let y = 100; y < 900; y++) pixels.set([0, 0, 0, 255], (y * width + 1400) * 4);
+  for (let y = 200; y < 800; y++) {
+    for (let x = 100; x < 900; x++) {
+      if (x >= 300 && x < 700 && y >= 400 && y < 600) continue;
+      pixels.set([0, 0, 0, 255], (y * width + x) * 4);
+    }
+  }
+  const loops = trace(pixels, width, height, 128, false, 0);
+  assert.equal(loops.length, 3);
+  function area(ring) {
+    return ring.reduce((sum, [x, y], i) => {
+      const [nx, ny] = ring[(i + 1) % ring.length];
+      return sum + x * ny - nx * y;
+    }, 0) / 2;
+  }
+  assert.equal(loops.reduce((sum, loop) => sum + area(loop), 0), 800 * 600 - 400 * 200 + 800);
+  const line = loops.find(loop => area(loop) === 800);
+  assert.deepEqual(line, [[1400, 100], [1401, 100], [1401, 900], [1400, 900]]);
+  assert.deepEqual(geometry([line], width, height, 204.8, 102.4)[0],
+    [[140, 92.4], [140.1, 92.4], [140.1, 12.4], [140, 12.4]]);
 });
