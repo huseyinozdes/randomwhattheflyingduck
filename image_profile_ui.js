@@ -32,9 +32,7 @@ const ImageProfileUI = (function () {
           Math.max(image.naturalWidth, image.naturalHeight) > 8192) {
         throw new Error("Image exceeds the profile limit of 20 MiB, 20 megapixels or 8192 pixels per side.");
       }
-      const scale = Math.min(1, 512 / Math.max(image.naturalWidth, image.naturalHeight));
-      const width = Math.max(1, Math.round(image.naturalWidth * scale));
-      const height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const width = image.naturalWidth, height = image.naturalHeight;
       const canvas = document.createElement("canvas");
       canvas.width = width; canvas.height = height;
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -60,7 +58,7 @@ const ImageProfileUI = (function () {
       svg.replaceChildren(path);
       paths = result;
       download.disabled = false;
-      status.textContent = "[ OK ] " + loops.length + " closed outlines" + (scale < 1 ? " (traced at " + width + " x " + height + " px)" : "");
+      status.textContent = "[ OK ] " + loops.length + " closed outlines (traced at source " + width + " x " + height + " px)";
     } catch (error) {
       clear("[ ERROR ] " + (error.message || "Could not trace image."));
     }

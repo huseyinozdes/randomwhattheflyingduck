@@ -20,9 +20,15 @@ The interface loads Tailwind CSS and fonts from public CDNs, so the visual styli
 
 ## Image to DXF profiles
 
-Load a PNG or JPEG in the Image tab and adjust threshold, invert, simplification, image dimensions in millimetres, and the optional centered frame. The image width and height describe the entire image canvas, including any blank margins. The preview and downloadable DXF use the same closed outline geometry and millimetre units. Transparent pixels are excluded. Tracing is limited to 20 MiB, 20 megapixels, 8192 pixels per side, and a 512-pixel tracing dimension; very detailed images may exceed the contour or edge limits. Simplification is conservative around holes and touching contours.
+Load a PNG or JPEG in the Image tab and adjust threshold, invert, simplification, image dimensions in millimetres, and the optional centered frame. The image width and height describe the entire image canvas, including any blank margins. The SVG preview and downloadable DXF use the same closed outline geometry and millimetre units. Tracing uses the source resolution without downsampling, limited to 20 MiB, 20 megapixels and 8192 pixels per side. Images exceeding 100000 outline edges or 512 contours produce an explicit error rather than a reduced-detail export.
+
+Threshold selects luminance less than or equal to the setting; invert selects luminance strictly greater than it. Fully transparent pixels are excluded in both modes; partial transparency is composited against white before comparing luminance. The background-removal button separately removes pixels whose red, green and blue channels are all at least 235; it does not remove dark backgrounds.
+
+Outlines follow pixel boundaries, not fitted curves or centerlines, so magnification can reveal stair steps even in the resolution-independent SVG preview. Boundaries pinched at a grid corner are split into separate closed rings rather than self-touching polylines; distinct rings may still share a corner. Simplification is measured in source pixels, preserves topology conservatively around holes and touching contours, and leaves overlapping bounding boxes and contours above 300 corners unchanged. PNG/JPEG exports use the selected output resolution with centered aspect-preserving fit (transparent padding in PNG, white padding in JPEG); that setting does not change DXF tracing resolution.
 
 Logos and lettering are traced as shapes; fonts are not identified and text is not editable. Inspect the DXF and calibrate dimensions before cutting: there is no kerf compensation or machine control.
+
+DXF export writes an AutoCAD R2000 (`AC1015`) document with symbol tables, model/paper-space blocks and layouts, unique handles and model-space entity ownership, while retaining `$INSUNITS = 4` (millimetres). These exports have been loaded successfully through the installed eDrawings 2024 SP05 viewer control and independently read back for geometry and units. The previous HEADER/ENTITIES-only R2000 output was not accepted by that viewer despite passing a tolerant parser's audit. Other CAD/CAM readers and versions are not certified.
 
 ## Verification gate
 
