@@ -8,14 +8,14 @@
   const MAX_PIXELS = 20000000;
   const MAX_EDGES = 100000;
 
-  function trace(data, width, height, threshold, invert, tolerance) {
+  function trace(data, width, height, threshold, invert, tolerance, quality = false) {
     if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
         width * height > MAX_PIXELS || Math.max(width, height) > 8192 ||
         !data || data.length !== width * height * 4) {
       throw new Error("Invalid or oversized raster.");
     }
     if (!Number.isFinite(threshold) || threshold < 0 || threshold > 255 ||
-        !Number.isFinite(tolerance) || tolerance < 0 || tolerance > 3) {
+        !Number.isFinite(tolerance) || tolerance < 0 || tolerance > 3 || typeof quality !== "boolean") {
       throw new Error("Invalid tracing settings.");
     }
     const mask = new Uint8Array(width * height);
@@ -77,15 +77,9 @@
         }
       }
     }
+    if (quality) return smoothContours(loops, width);
     if (tolerance === 0) return loops;
-    const boxes = loops.map(loop => {
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      for (const [x, y] of loop) {
-        minX = Math.min(minX, x); minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
-      }
-      return { minX, minY, maxX, maxY };
-    });
+    const boxes = loops.map(ringBounds);
     return loops.map((loop, i) => {
       const box = boxes[i];
       // Avoid changing nested or touching contours, including holes.
@@ -97,27 +91,117 @@
     });
   }
 
-  function isSimple(ring) {
-    function cross(a, b, c) { return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]); }
-    function on(a, b, c) {
-      return c[0] >= Math.min(a[0], b[0]) && c[0] <= Math.max(a[0], b[0]) &&
-        c[1] >= Math.min(a[1], b[1]) && c[1] <= Math.max(a[1], b[1]);
+  function ringBounds(loop) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const [x, y] of loop) {
+      minX = Math.min(minX, x); minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
     }
+    return { minX, minY, maxX, maxY };
+  }
+
+  function intersects(a, b, c, d) {
+    function cross(p, q, r) { return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]); }
+    function on(p, q, r) {
+      return r[0] >= Math.min(p[0], q[0]) && r[0] <= Math.max(p[0], q[0]) &&
+        r[1] >= Math.min(p[1], q[1]) && r[1] <= Math.max(p[1], q[1]);
+    }
+    const abC = cross(a, b, c), abD = cross(a, b, d), cdA = cross(c, d, a), cdB = cross(c, d, b);
+    return (abC === 0 && on(a, b, c)) || (abD === 0 && on(a, b, d)) ||
+      (cdA === 0 && on(c, d, a)) || (cdB === 0 && on(c, d, b)) ||
+      ((abC > 0) !== (abD > 0) && (cdA > 0) !== (cdB > 0));
+  }
+
+  function isSimple(ring, budget) {
     for (let i = 0; i < ring.length; i++) {
       const a = ring[i], b = ring[(i + 1) % ring.length];
       for (let j = i + 1; j < ring.length; j++) {
         if (j === i + 1 || (i === 0 && j === ring.length - 1)) continue;
+        if (budget && --budget.remaining < 0) return false;
         const c = ring[j], d = ring[(j + 1) % ring.length];
-        const abC = cross(a, b, c), abD = cross(a, b, d), cdA = cross(c, d, a), cdB = cross(c, d, b);
-        if ((abC === 0 && on(a, b, c)) || (abD === 0 && on(a, b, d)) ||
-            (cdA === 0 && on(c, d, a)) || (cdB === 0 && on(c, d, b)) ||
-            ((abC > 0) !== (abD > 0) && (cdA > 0) !== (cdB > 0))) return false;
+        if (intersects(a, b, c, d)) return false;
       }
     }
     return true;
   }
 
-  function simplify(points, tolerance) {
+  function smoothContours(loops, width) {
+    const boxes = loops.map(ringBounds), result = loops.slice();
+    const owners = new Map(), touching = new Uint8Array(loops.length);
+    const budget = { remaining: 2000000 };
+    loops.forEach((loop, i) => loop.forEach(([x, y]) => {
+      const key = y * (width + 1) + x;
+      if (owners.has(key) && owners.get(key) !== i) touching[i] = touching[owners.get(key)] = 1;
+      else owners.set(key, i);
+    }));
+    function spans(ring, y, guard) {
+      const crossings = [];
+      for (let i = 0; i < ring.length; i++) {
+        const a = ring[i], b = ring[(i + 1) % ring.length];
+        if ((a[1] > y) === (b[1] > y)) continue;
+        const dx = b[0] - a[0], dy = b[1] - a[1];
+        const x = a[0] + (y - a[1]) * dx / dy;
+        // Keep a margin around pixel centers for coordinate rounding on export.
+        if (guard && Math.abs(x - (Math.round(x - 0.5) + 0.5)) * Math.abs(dy) / Math.hypot(dx, dy) < 0.002) return null;
+        crossings.push(x);
+      }
+      crossings.sort((a, b) => a - b);
+      const intervals = [];
+      for (let i = 0; i < crossings.length; i += 2) {
+        const start = Math.ceil(crossings[i] - 0.5), end = Math.ceil(crossings[i + 1] - 0.5);
+        if (start >= end) continue;
+        const last = intervals[intervals.length - 1];
+        if (last && start <= last[1]) last[1] = Math.max(last[1], end);
+        else intervals.push([start, end]);
+      }
+      return intervals;
+    }
+    function samePixels(before, after, box) {
+      const cost = (box.maxY - box.minY) * (before.length + after.length);
+      budget.remaining -= cost;
+      if (budget.remaining < 0) return false;
+      for (let y = box.minY + 0.5; y < box.maxY; y++) {
+        const a = spans(before, y, false), b = spans(after, y, true);
+        if (!b || a.length !== b.length || a.some((span, i) => span[0] !== b[i][0] || span[1] !== b[i][1])) return false;
+      }
+      return true;
+    }
+    function separate(candidate, index) {
+      const box = boxes[index];
+      for (let j = 0; j < result.length; j++) {
+        const otherBox = boxes[j], other = result[j];
+        if (j === index || box.minX > otherBox.maxX || box.maxX < otherBox.minX ||
+            box.minY > otherBox.maxY || box.maxY < otherBox.minY) continue;
+        for (let a = 0; a < candidate.length; a++) {
+          for (let b = 0; b < other.length; b++) {
+            if (--budget.remaining < 0 || intersects(candidate[a], candidate[(a + 1) % candidate.length],
+              other[b], other[(b + 1) % other.length])) return false;
+          }
+        }
+      }
+      return true;
+    }
+    for (let i = 0; i < loops.length; i++) {
+      const loop = loops[i], box = boxes[i];
+      if (touching[i] || loop.length <= 4 || loop.length > 10000 || budget.remaining <= 0) continue;
+      // Balance staircase corners by a quarter pixel, retaining extrema and long sharp corners.
+      const balanced = loop.map((p, j) => {
+        const a = loop[(j + loop.length - 1) % loop.length], b = loop[(j + 1) % loop.length];
+        const da = Math.hypot(a[0] - p[0], a[1] - p[1]), db = Math.hypot(b[0] - p[0], b[1] - p[1]);
+        if (p[0] === box.minX || p[0] === box.maxX || p[1] === box.minY || p[1] === box.maxY || Math.min(da, db) > 1) return p;
+        return [p[0] + 0.25 * ((a[0] - p[0]) / da + (b[0] - p[0]) / db),
+          p[1] + 0.25 * ((a[1] - p[1]) / da + (b[1] - p[1]) / db)];
+      });
+      const candidate = simplify(balanced, 0.35, budget), bounds = ringBounds(candidate);
+      if (candidate.length > 300 || Object.keys(box).some(key => box[key] !== bounds[key]) ||
+          ringArea(candidate) * ringArea(loop) <= 0 || !isSimple(candidate, budget) ||
+          !samePixels(loop, candidate, box) || !separate(candidate, i)) continue;
+      result[i] = candidate;
+    }
+    return result;
+  }
+
+  function simplify(points, tolerance, budget) {
     const ring = points.filter((p, i) => {
       const a = points[(i + points.length - 1) % points.length], b = points[(i + 1) % points.length];
       return (p[0] - a[0]) * (b[1] - p[1]) !== (p[1] - a[1]) * (b[0] - p[0]);
@@ -137,6 +221,7 @@
         const dx = b[0] - a[0], dy = b[1] - a[1], length2 = dx * dx + dy * dy;
         let best = tolerance * tolerance, index = -1;
         for (let i = start + 1; i < end; i++) {
+          if (budget && --budget.remaining < 0) return null;
           const t = length2 ? Math.max(0, Math.min(1, ((path[i][0] - a[0]) * dx + (path[i][1] - a[1]) * dy) / length2)) : 0;
           const d = (path[i][0] - a[0] - t * dx) ** 2 + (path[i][1] - a[1] - t * dy) ** 2;
           if (d > best) { best = d; index = i; }
@@ -145,8 +230,11 @@
       }
       return path.filter((_, i) => keep[i]);
     }
-    const result = reduce(ring.slice(0, split + 1)).slice(0, -1)
-      .concat(reduce(ring.slice(split).concat([ring[0]])).slice(0, -1));
+    const first = reduce(ring.slice(0, split + 1));
+    if (!first) return ring;
+    const second = reduce(ring.slice(split).concat([ring[0]]));
+    if (!second) return ring;
+    const result = first.slice(0, -1).concat(second.slice(0, -1));
     const area = ringArea(result);
     return result.length >= 3 && area * ringArea(ring) > 0 ? result : ring;
   }
@@ -167,7 +255,7 @@
         frame.width < width || frame.height < height || frame.width > 10000 || frame.height > 10000)) {
       throw new Error("Frame dimensions must enclose the image and be at most 10000 mm.");
     }
-    function point(x, y) { return [Number(x.toFixed(5)), Number(y.toFixed(5))]; }
+    function point(x, y) { return [Number(x.toFixed(8)), Number(y.toFixed(8))]; }
     const paths = loops.map(loop => loop.map(([x, y]) => point(x * width / rasterWidth, (rasterHeight - y) * height / rasterHeight)));
     if (frame) {
       const x = (width - frame.width) / 2, y = (height - frame.height) / 2;
@@ -231,7 +319,7 @@
     }
     for (const path of paths) {
       entities.push(0, "LWPOLYLINE", 5, handle(), 330, model, 100, "AcDbEntity", 8, "0", 100, "AcDbPolyline", 90, path.length, 70, 1);
-      for (const [x, y] of path) entities.push(10, Number(x.toFixed(5)), 20, Number(y.toFixed(5)));
+      for (const [x, y] of path) entities.push(10, Number(x.toFixed(8)), 20, Number(y.toFixed(8)));
     }
     objects.push(0, "DICTIONARY", 5, root, 330, "0", 100, "AcDbDictionary", 281, 1,
       3, "ACAD_GROUP", 350, groups, 3, "ACAD_LAYOUT", 350, layouts,
@@ -261,5 +349,5 @@
     lines.push(0, "EOF", "");
     return lines.join("\r\n");
   }
-  return { trace, geometry, dxf };
+  return { trace, geometry, dxf, version: "1.5.1" };
 });

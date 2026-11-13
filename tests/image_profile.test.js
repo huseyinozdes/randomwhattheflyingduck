@@ -13,9 +13,9 @@ function raster(rows) {
   });
   return { pixels, width, height };
 }
-function run(rows, threshold = 128, invert = false, tolerance = 0) {
+function run(rows, threshold = 128, invert = false, tolerance = 0, quality = false) {
   const image = raster(rows);
-  return trace(image.pixels, image.width, image.height, threshold, invert, tolerance);
+  return trace(image.pixels, image.width, image.height, threshold, invert, tolerance, quality);
 }
 
 test("traces closed boundaries for a silhouette and its hole", () => {
@@ -47,6 +47,44 @@ test("threshold, inversion and simplification alter traced outlines", () => {
   assert.deepEqual(run(["#."], 128, true)[0], [[1, 0], [2, 0], [2, 1], [1, 1]]);
   const stair = ["#.....", "##....", "###...", "####..", "#####.", "######"];
   assert.ok(run(stair, 128, false, 1).flat().length < run(stair).flat().length);
+});
+
+test("safe smoothing reduces straight stair steps while preserving holes, thin lines and scaled pixel classification", () => {
+  const width = 96, height = 32;
+  const rows = Array.from({ length: height }, (_, y) => Array.from({ length: width }, (_, x) => {
+    const hole = x >= 10 && x < 13 && y >= 15 && y < 18;
+    return (x < 1 + 2 * y && !hole) || (x === 85 && y >= 2 && y < 30) ? "#" : ".";
+  }).join(""));
+  const exact = run(rows), smooth = run(rows, 128, false, 0, true);
+  assert.equal(smooth.length, exact.length);
+  assert.ok(smooth.flat().length < exact.flat().length / 2);
+  function bounds(ring) {
+    return [Math.min(...ring.map(p => p[0])), Math.min(...ring.map(p => p[1])),
+      Math.max(...ring.map(p => p[0])), Math.max(...ring.map(p => p[1]))];
+  }
+  assert.deepEqual(smooth.map(bounds), exact.map(bounds));
+  const scaled = geometry(smooth, width, height, 0.1, 0.1, null)
+    .map(ring => ring.map(([x, y]) => [x * width / 0.1, height - y * height / 0.1]));
+  function inside(ring, x, y) {
+    let selected = false;
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length];
+      if ((a[1] > y) !== (b[1] > y) && x < a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1])) selected = !selected;
+    }
+    return selected;
+  }
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      assert.equal(scaled.filter(ring => inside(ring, x + 0.5, y + 0.5)).length % 2 === 1,
+        rows[y][x] === "#", `pixel ${x},${y}`);
+    }
+  }
+});
+
+test("safe smoothing retains contours sharing a corner instead of changing their topology", () => {
+  const rows = ["###", "#.#", ".##"];
+  assert.deepEqual(run(rows, 128, false, 0, true), run(rows));
+  assert.deepEqual(run(["#.", ".#"], 128, false, 0, true), run(["#.", ".#"]));
 });
 
 test("geometry scales and flips image coordinates and adds a centered frame", () => {
