@@ -4,7 +4,7 @@ A minimalist, browser-based collection of engineering workflow utilities. The co
 
 ## Included utilities
 
-- Image preview, simple light-background removal, resizing, and PNG/JPEG export
+- Image preview, simple light-background removal, resizing, PNG/JPEG export, and image-to-DXF outlines
 - Structured row editing and CSV export
 - Common length, temperature, and weight conversions
 - OBJ-to-STL mesh conversion and STL pass-through export
@@ -17,6 +17,12 @@ The CAD converter intentionally supports only OBJ-to-STL and STL-to-STL operatio
 Open `index.html` in a browser. No build step or dependencies are required.
 
 The interface loads Tailwind CSS and fonts from public CDNs, so the visual styling requires a network connection on first load. User-selected files are processed locally in the browser.
+
+## Image to DXF profiles
+
+Load a PNG or JPEG in the Image tab and adjust threshold, invert, simplification, image dimensions in millimetres, and the optional centered frame. The image width and height describe the entire image canvas, including any blank margins. The preview and downloadable DXF use the same closed outline geometry and millimetre units. Transparent pixels are excluded. Tracing is limited to 20 MiB, 20 megapixels, 8192 pixels per side, and a 512-pixel tracing dimension; very detailed images may exceed the contour or edge limits. Simplification is conservative around holes and touching contours.
+
+Logos and lettering are traced as shapes; fonts are not identified and text is not editable. Inspect the DXF and calibrate dimensions before cutting: there is no kerf compensation or machine control.
 
 ## Verification gate
 

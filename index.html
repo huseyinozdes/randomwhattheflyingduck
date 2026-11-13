@@ -179,6 +179,30 @@
           </div>
         </div>
         <p id="img-status" class="text-[13px] brd px-3 py-2 mt-2" aria-live="polite">[ IDLE ] awaiting input</p>
+
+        <div class="brd p-4 mt-5">
+          <h3 style="font-size: 15px; font-weight: 700;">[ IMAGE TO DXF PROFILES ]</h3>
+          <p class="mt-2 mb-4" style="color: rgb(138,138,138); font-size: 12px;">Trace the loaded image locally. Lettering and logos become outlines, not editable text; fonts are not identified.</p>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <label style="font-size: 12px;">IMAGE WIDTH (mm)<input id="profile-width" type="number" min="0.1" max="10000" step="0.1" value="100" class="native-input brd bg-transparent px-2 py-1 w-full"></label>
+            <label style="font-size: 12px;">IMAGE HEIGHT (mm)<input id="profile-height" type="number" min="0.1" max="10000" step="0.1" value="100" class="native-input brd bg-transparent px-2 py-1 w-full"></label>
+          </div>
+          <label class="block mb-4" style="font-size: 12px;"><input id="profile-lock" type="checkbox" checked> lock image aspect ratio</label>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <label style="font-size: 12px;">THRESHOLD <span id="profile-threshold-value">128</span><input id="profile-threshold" type="range" min="0" max="255" value="128" class="w-full"></label>
+            <label style="font-size: 12px;">SIMPLIFICATION <span id="profile-simplify-value">0</span> px<input id="profile-simplify" type="range" min="0" max="3" step="0.25" value="0" class="w-full"></label>
+          </div>
+          <label class="block mb-4" style="font-size: 12px;"><input id="profile-invert" type="checkbox"> invert threshold</label>
+          <label class="block mb-3" style="font-size: 12px;"><input id="profile-frame" type="checkbox"> add centered rectangular frame</label>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <label style="font-size: 12px;">FRAME WIDTH (mm)<input id="profile-frame-width" type="number" min="0.1" max="10000" step="0.1" value="110" class="native-input brd bg-transparent px-2 py-1 w-full"></label>
+            <label style="font-size: 12px;">FRAME HEIGHT (mm)<input id="profile-frame-height" type="number" min="0.1" max="10000" step="0.1" value="110" class="native-input brd bg-transparent px-2 py-1 w-full"></label>
+          </div>
+          <svg id="profile-preview" class="brd w-full mb-3" style="height: 240px; background: rgb(22,22,22);" role="img" aria-label="DXF outline preview"></svg>
+          <p id="profile-status" class="text-[13px] mb-3" aria-live="polite">[ IDLE ] load an image to trace</p>
+          <button id="profile-download" type="button" disabled class="btn brd px-4 py-2 w-full" style="background: rgb(229,229,229); color: rgb(17,17,17); font-weight: 700; font-size: 13px;">download dxf</button>
+          <p class="info-panel mt-4">Inspect the outlines and calibrate dimensions before cutting. Simplification can alter detail. No kerf compensation or machine control is provided.</p>
+        </div>
       </section>
 
       <section id="tab-data" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-data">
@@ -440,6 +464,7 @@
 
     function loadSelectedImage(file) {
       if (!file) { setImgStatus('WARN', 'no file selected'); return; }
+      ImageProfileUI.setImage(null);
       if (!isImageFile(file)) { setImgStatus('ERROR', 'file is not an image'); return; }
       document.getElementById('file-name').textContent = file.name;
       const reader = new FileReader();
@@ -450,6 +475,7 @@
           bgRemoved = false;
           preview.classList.remove('transparent-mode');
           renderPreview(img);
+          ImageProfileUI.setImage(img, file.size);
           setImgStatus('OK', 'image loaded ' + img.naturalWidth + 'x' + img.naturalHeight);
         };
         img.onerror = function () { setImgStatus('ERROR', 'could not decode image'); };
@@ -498,6 +524,7 @@
             bgRemoved = true;
             preview.classList.add('transparent-mode');
             renderPreview(out);
+            ImageProfileUI.setImage(out, fileInput.files && fileInput.files[0] && fileInput.files[0].size);
             setImgStatus('OK', 'background removed (transparent PNG-ready)');
           };
           out.src = c.toDataURL('image/png');
@@ -890,5 +917,7 @@
       addDaysToDate();
     });
   </script>
+  <script src="image_profile.js"></script>
+  <script src="image_profile_ui.js"></script>
 </body>
 </html>
