@@ -60,6 +60,49 @@ test("geometry scales and flips image coordinates and adds a centered frame", ()
   assert.match(text, /90\r\n4\r\n70\r\n1\r\n10\r\n0\r\n20\r\n10\r\n/);
 });
 
+test("DXF defines complete R2000 sections, unique handles and model-space ownership", () => {
+  const lines = dxf([[[0, 0], [20, 0], [20, 10], [0, 10]]]).trimEnd().split("\r\n");
+  const records = [];
+  for (let i = 0; i < lines.length; i += 2) {
+    const tag = [Number(lines[i]), lines[i + 1]];
+    if (tag[0] === 0) records.push([]);
+    records[records.length - 1].push(tag);
+  }
+  const value = (record, code) => record.find(tag => tag[0] === code)?.[1];
+  const sections = records.filter(record => value(record, 0) === "SECTION");
+  assert.deepEqual(sections.map(record => value(record, 2)), ["HEADER", "TABLES", "BLOCKS", "ENTITIES", "OBJECTS"]);
+  const model = records.find(record => value(record, 0) === "BLOCK_RECORD" && value(record, 2) === "*Model_Space");
+  const polyline = records.find(record => value(record, 0) === "LWPOLYLINE");
+  assert.equal(value(polyline, 330), value(model, 5));
+  assert.equal(value(polyline, 70), "1");
+  assert.equal(value(polyline, 90), "4");
+  const modelLayout = records.find(record => value(record, 0) === "LAYOUT" && value(record, 5) === value(model, 340));
+  assert.equal(modelLayout.filter(tag => tag[0] === 330).at(-1)[1], value(model, 5));
+  const handles = records.filter(record => value(record, 0) !== "SECTION")
+    .map(record => value(record, 5)).filter(Boolean);
+  assert.equal(new Set(handles).size, handles.length);
+  const seed = Number.parseInt(value(sections[0], 5), 16);
+  assert.ok(handles.every(id => Number.parseInt(id, 16) < seed));
+  const knownHandles = new Set(["0", ...handles]);
+  for (const record of records) {
+    for (const [code, id] of record) {
+      if ([330, 340, 350].includes(code)) assert.ok(knownHandles.has(id), `unresolved handle ${id}`);
+    }
+  }
+  assert.ok(records.some(record => value(record, 0) === "LAYER" && value(record, 2) === "0"));
+  assert.ok(records.some(record => value(record, 0) === "DICTIONARY" && record.some(tag => tag[1] === "ACAD_LAYOUT")));
+});
+
+test("DXF serializes a detailed outline without overflowing the JavaScript argument limit", () => {
+  const ring = Array.from({ length: 40000 }, (_, i) => {
+    const angle = i * 2 * Math.PI / 40000;
+    return [100 * Math.cos(angle), 100 * Math.sin(angle)];
+  });
+  const text = dxf([ring]);
+  assert.match(text, /90\r\n40000\r\n70\r\n1\r\n/);
+  assert.ok(text.endsWith("0\r\nEOF\r\n"));
+});
+
 test("rejects malformed, oversized and invalid inputs", () => {
   assert.throws(() => trace(new Uint8Array(4), 8193, 1, 128, false, 0), /oversized/);
   assert.throws(() => trace(new Uint8Array(4), 5000, 5000, 128, false, 0), /oversized/);

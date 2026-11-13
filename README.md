@@ -28,6 +28,8 @@ Outlines follow pixel boundaries, not fitted curves or centerlines, so magnifica
 
 Logos and lettering are traced as shapes; fonts are not identified and text is not editable. Inspect the DXF and calibrate dimensions before cutting: there is no kerf compensation or machine control.
 
+DXF export writes an AutoCAD R2000 (`AC1015`) document with symbol tables, model/paper-space blocks and layouts, unique handles and model-space entity ownership, while retaining `$INSUNITS = 4` (millimetres). These exports have been loaded successfully through the installed eDrawings 2024 SP05 viewer control and independently read back for geometry and units. The previous HEADER/ENTITIES-only R2000 output was not accepted by that viewer despite passing a tolerant parser's audit. Other CAD/CAM readers and versions are not certified.
+
 ## Verification gate
 
 Repository-standard verification commands:
