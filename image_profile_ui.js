@@ -1,7 +1,7 @@
 "use strict";
 
 const ImageProfileUI = (function () {
-  const expectedVersion = "1.5.1";
+  const expectedVersion = "1.6.0";
   const get = id => document.getElementById("profile-" + id);
   const fields = ["width", "height", "lock", "threshold", "simplify", "invert", "quality", "frame", "frame-width", "frame-height"];
   const svg = get("preview"), status = get("status"), download = get("download");
@@ -88,26 +88,21 @@ const ImageProfileUI = (function () {
   }));
   download.addEventListener("click", async function () {
     if (!paths) return;
-    const stem = get("filename").value.trim().replace(/[. ]+$/, "")
-      .replace(/(?:\.dxf[. ]*)+$/i, "").trim().replace(/[. ]+$/, "") || "image-profile";
-    if (/[<>:"/\\|?*\x00-\x1f]/.test(stem) || /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(stem)) {
-      status.textContent = "[ ERROR ] Choose a file name without reserved characters or device names. | exporter " + ImageProfile.version;
-      return;
-    }
     try {
+      const filename = ImageProfile.dxfFilename(get("filename").value);
       const blob = new Blob([ImageProfile.dxf(paths)], { type: "application/dxf" });
       if (typeof triggerSaveFile === "function") {
-        await triggerSaveFile(blob, stem + ".dxf", "application/dxf");
+        await triggerSaveFile(blob, filename, "application/dxf");
       } else {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.href = url; link.download = stem + ".dxf";
+        link.href = url; link.download = filename;
         document.body.appendChild(link);
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
-      status.textContent = "[ OK ] DXF save requested: " + stem + ".dxf | exporter " + ImageProfile.version;
+      status.textContent = "[ OK ] DXF save requested: " + filename + " | exporter " + ImageProfile.version;
     } catch (error) {
       status.textContent = "[ ERROR ] " + (error.message || "Could not save DXF.") + " | exporter " + ImageProfile.version;
     }

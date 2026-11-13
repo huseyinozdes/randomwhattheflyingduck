@@ -264,7 +264,10 @@
     return paths;
   }
 
-  function dxf(paths) {
+  function dxf(paths, closedPaths = paths.map(() => true)) {
+    if (!Array.isArray(closedPaths) || closedPaths.length !== paths.length || closedPaths.some(value => typeof value !== "boolean")) {
+      throw new Error("DXF closure flags must match the exported paths.");
+    }
     let nextHandle = 1;
     const handle = () => (nextHandle++).toString(16).toUpperCase();
     const tableNames = ["VPORT", "LTYPE", "LAYER", "STYLE", "VIEW", "UCS", "APPID", "DIMSTYLE", "BLOCK_RECORD"];
@@ -317,8 +320,8 @@
         2, name, 70, 0, 10, 0, 20, 0, 30, 0, 3, name, 1, "",
         0, "ENDBLK", 5, handle(), 330, owner, 100, "AcDbEntity", 8, "0", 100, "AcDbBlockEnd");
     }
-    for (const path of paths) {
-      entities.push(0, "LWPOLYLINE", 5, handle(), 330, model, 100, "AcDbEntity", 8, "0", 100, "AcDbPolyline", 90, path.length, 70, 1);
+    for (const [index, path] of paths.entries()) {
+      entities.push(0, "LWPOLYLINE", 5, handle(), 330, model, 100, "AcDbEntity", 8, "0", 100, "AcDbPolyline", 90, path.length, 70, closedPaths[index] ? 1 : 0);
       for (const [x, y] of path) entities.push(10, Number(x.toFixed(8)), 20, Number(y.toFixed(8)));
     }
     objects.push(0, "DICTIONARY", 5, root, 330, "0", 100, "AcDbDictionary", 281, 1,
@@ -349,5 +352,13 @@
     lines.push(0, "EOF", "");
     return lines.join("\r\n");
   }
-  return { trace, geometry, dxf, version: "1.5.1" };
+  function dxfFilename(value) {
+    const stem = value.trim().replace(/[. ]+$/, "")
+      .replace(/(?:\.dxf[. ]*)+$/i, "").trim().replace(/[. ]+$/, "") || "image-profile";
+    if (/[<>:"/\\|?*\x00-\x1f]/.test(stem) || /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(stem)) {
+      throw new Error("Choose a file name without reserved characters or device names.");
+    }
+    return stem + ".dxf";
+  }
+  return { trace, geometry, dxf, dxfFilename, version: "1.6.0" };
 });
