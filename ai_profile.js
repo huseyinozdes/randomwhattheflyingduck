@@ -4,7 +4,7 @@
   if (typeof module === "object" && module.exports) module.exports = factory(require("pdf-lib"));
   else root.AiProfile = factory(root.PDFLib);
 })(typeof globalThis !== "undefined" ? globalThis : this, function (PDF) {
-  const version = "1.6.0", tolerance = 0.01;
+  const version = "1.6.1", tolerance = 0.01;
   const MAX_BYTES = 10 * 1024 * 1024, MAX_DECODED = 16 * 1024 * 1024, MAX_POINTS = 100000;
   const name = key => PDF.PDFName.of(key);
   const get = (dict, key) => dict instanceof PDF.PDFDict ? dict.lookup(name(key)) : undefined;
@@ -46,6 +46,94 @@
     const [x0, y0, x1, y1] = values;
     if (x1 <= x0 || y1 <= y0) fail("Invalid AI/PDF bounding box.");
     return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]].map(([x, y]) => transform(matrix, x, y));
+  }
+
+  const control = /[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g;
+  function layerLabel(group) {
+    try {
+      const text = get(group, "Name");
+      return (text && typeof text.decodeText === "function" ? text.decodeText() : "").replace(control, " ").replace(/\s+/g, " ").trim().slice(0, 60);
+    } catch (error) { return ""; }
+  }
+
+  // Layers are evaluated against the PDF default view configuration only. Visibility that depends on the viewer
+  // (zoom, language, user, expressions, unchanged or conflicting states) fails closed instead of being guessed.
+  function optionalContent(catalog, context) {
+    const properties = get(catalog, "OCProperties");
+    if (properties === undefined) return null;
+    const reject = reason => fail("Unsupported layer visibility: " + reason +
+      ". Show or hide layers explicitly in Illustrator, then save a new PDF-compatible AI file.");
+    const list = (value, what) => {
+      if (!(value instanceof PDF.PDFArray)) fail("Invalid AI/PDF optional-content " + what + " array.");
+      return value.asArray().map(item => context.lookup(item));
+    };
+    const viewable = value => {
+      if (value === undefined) return true;
+      const names = (value instanceof PDF.PDFArray ? list(value, "intent") : [value]).map(named);
+      return names.includes("View") || names.includes("All");
+    };
+    if (!(properties instanceof PDF.PDFDict)) fail("Invalid AI/PDF optional-content properties.");
+    const config = get(properties, "D");
+    if (!(config instanceof PDF.PDFDict)) fail("Invalid or missing AI/PDF default optional-content configuration.");
+    const states = new Map();
+    for (const group of list(get(properties, "OCGs"), "layer")) {
+      if (!(group instanceof PDF.PDFDict) || named(get(group, "Type")) !== "OCG") fail("Invalid AI/PDF optional-content layer.");
+      if (!viewable(get(group, "Intent"))) reject("a layer is intended for design only");
+      states.set(group, true);
+    }
+    if (!viewable(get(config, "Intent"))) reject("the default configuration is not intended for viewing");
+    const baseValue = get(config, "BaseState"), base = baseValue === undefined ? "ON" : named(baseValue);
+    if (base !== "ON" && base !== "OFF") reject("BaseState " + (base || "is invalid"));
+    for (const group of states.keys()) states.set(group, base === "ON");
+    const listed = key => get(config, key) === undefined ? [] : list(get(config, key), key).map(group => {
+      if (!states.has(group)) fail("AI/PDF optional-content " + key + " list references an undeclared layer.");
+      return group;
+    });
+    const shown = listed("ON"), hidden = listed("OFF"), turnedOff = new Set(hidden);
+    if (shown.some(group => turnedOff.has(group))) reject("a layer is listed as both ON and OFF");
+    for (const group of shown) states.set(group, true);
+    for (const group of hidden) states.set(group, false);
+    const viewState = group => {
+      const view = get(get(group, "Usage"), "View");
+      return view === undefined ? undefined : named(get(view, "ViewState"));
+    };
+    const conflict = "a layer's view usage conflicts with its default state";
+    // Viewers disagree about a View usage that no /AS entry applies (some hide a layer whose ViewState is OFF), so a layer
+    // that is shown by default but marked OFF is rejected instead of exported. The opposite case stays hidden unless an
+    // /AS entry applies it, which is rejected below.
+    for (const [group, visible] of states) if (visible && viewState(group) === "OFF") reject(conflict);
+    const automatic = get(config, "AS");
+    for (const entry of automatic === undefined ? [] : list(automatic, "automatic-state")) {
+      if (!(entry instanceof PDF.PDFDict)) fail("Invalid AI/PDF optional-content automatic-state entry.");
+      const event = named(get(entry, "Event"));
+      if (!["View", "Print", "Export"].includes(event)) fail("Unknown AI/PDF optional-content automatic-state event.");
+      // Print and Export events do not change what the page shows when opened.
+      if (event !== "View") continue;
+      const categories = list(get(entry, "Category"), "category").map(named);
+      if (categories.length !== 1 || categories[0] !== "View") reject("view-dependent " + (categories.join("/") || "unspecified") + " layer usage");
+      for (const group of list(get(entry, "OCGs"), "layer")) {
+        if (!states.has(group)) fail("AI/PDF optional-content automatic-state entry references an undeclared layer.");
+        const wanted = viewState(group);
+        if (wanted !== undefined && wanted !== "ON" && wanted !== "OFF") fail("Invalid AI/PDF layer view state.");
+        if (wanted !== undefined && (wanted === "ON") !== states.get(group)) reject(conflict);
+      }
+    }
+    function resolve(value) {
+      if (states.has(value)) return { visible: states.get(value), name: layerLabel(value) };
+      if (value instanceof PDF.PDFDict && named(get(value, "Type")) === "OCMD") {
+        if (get(value, "VE") !== undefined) reject("visibility expressions (/VE)");
+        const target = get(value, "OCGs");
+        const members = target instanceof PDF.PDFDict ? [target] : target instanceof PDF.PDFArray ? list(target, "membership") : [];
+        if (!members.length || !members.every(group => states.has(group))) fail("Invalid or undeclared AI/PDF optional-content membership dictionary.");
+        const flags = members.map(group => states.get(group)), policy = get(value, "P") === undefined ? "AnyOn" : named(get(value, "P"));
+        const visible = policy === "AnyOn" ? flags.some(Boolean) : policy === "AllOn" ? flags.every(Boolean) :
+          policy === "AnyOff" ? flags.some(flag => !flag) : policy === "AllOff" ? flags.every(flag => !flag) :
+            fail("Unsupported AI/PDF optional-content membership policy.");
+        return { visible, name: members.map(layerLabel).filter(Boolean).join(" + ") };
+      }
+      fail("AI/PDF optional content must reference a layer declared by the document catalog.");
+    }
+    return { resolve };
   }
 
   // This is a strict PDF content lexer, not a PostScript interpreter. Unknown operators fail closed.
@@ -132,8 +220,7 @@
       throw error;
     }
     if (doc.getPageCount() !== 1) fail("Multiple artboards/pages are not supported. Save a copy containing one artboard.");
-    if (get(doc.catalog, "OCProperties") !== undefined) fail("Optional/hidden layers are unsupported. Flatten layer visibility first.");
-    const page = doc.getPage(0), context = doc.context;
+    const page = doc.getPage(0), context = doc.context, optional = optionalContent(doc.catalog, context);
     if (page.node.Annots()?.size()) fail("Annotations are unsupported. Remove them before converting.");
     const crop = page.getCropBox(), media = page.getMediaBox();
     const x0 = Math.max(crop.x, media.x), y0 = Math.max(crop.y, media.y);
@@ -151,8 +238,12 @@
     const matrix = multiply([scale, 0, 0, scale, 0, 0],
       multiply(rotations[rotation], [1, 0, 0, 1, -x0, -y0]));
     const clip = rectangle(matrix, [x0, y0, x0 + width, y0 + height]);
-    const paths = [], closed = [], activeForms = new Set();
-    let decoded = 0, points = 0, operations = 0;
+    const paths = [], closed = [], activeForms = new Set(), excluded = { layers: [], paths: 0, objects: 0 };
+    let decoded = 0, points = 0, hiddenPoints = 0, operations = 0;
+    function exclude(label) {
+      const text = label || "unnamed layer";
+      if (!excluded.layers.includes(text) && excluded.layers.length < 20) excluded.layers.push(text);
+    }
     function decode(stream) {
       if (!(stream instanceof PDF.PDFRawStream) || get(stream.dict, "F")) fail("Unsupported external or invalid AI content stream.");
       const decoder = PDF.decodePDFRawStream(stream);
@@ -201,9 +292,16 @@
     function run(text, resources, initial, depth = 0) {
       if (depth > 16) fail("AI form nesting exceeds the limit.");
       if (initial.clips.length > 32) fail("AI clipping nesting exceeds the limit.");
-      let state = { matrix: initial.matrix.slice(), clips: initial.clips.slice() };
-      let current = null, currentPoint = null, subpaths = [], pendingClip = false, marks = 0, compatibility = 0;
-      const stack = [], args = [];
+      let state = { matrix: initial.matrix.slice(), clips: initial.clips.slice(), blocked: initial.blocked };
+      let current = null, currentPoint = null, subpaths = [], pendingClip = false, hiddenMarks = 0, compatibility = 0;
+      const stack = [], args = [], marks = [];
+      const hidden = () => hiddenMarks > 0;
+      // Unsupported state set inside a hidden layer only matters if it leaks into visible content, so it is
+      // remembered on the graphics state (restored by Q) and rejected when visible geometry is painted under it.
+      function stateEffect(check) {
+        if (!hidden()) { check(); return; }
+        try { check(); } catch (error) { if (!state.blocked) state.blocked = error.message; }
+      }
       const numbers = count => {
         if (args.length !== count || !args.every(v => typeof v === "number" && Number.isFinite(v))) fail("Invalid path operands.");
         return args;
@@ -212,17 +310,28 @@
         if (args.length !== 1 || typeof args[0]?.name !== "string") fail("Invalid named AI/PDF operand.");
         return args[0].name;
       };
+      function visibleLayer(value) {
+        if (!optional) fail("AI content references optional content, but the PDF catalog declares no layers.");
+        const layer = optional.resolve(value);
+        if (!layer.visible && !hidden()) exclude(layer.name);
+        return layer.visible;
+      }
+      function vertex() {
+        if (hidden() ? ++hiddenPoints > MAX_POINTS : ++points > MAX_POINTS) {
+          fail(hidden() ? "Hidden AI geometry exceeds 100000 vertices." : "AI geometry exceeds 100000 vertices.");
+        }
+      }
       function start(point) {
         current = { points: [point], controls: [point], closed: false, curved: false };
         subpaths.push(current); currentPoint = point;
-        if (++points > MAX_POINTS) fail("AI geometry exceeds 100000 vertices.");
+        vertex();
       }
       function append(point) {
         if (!currentPoint) fail("AI path has no starting point.");
         if (!current) start(currentPoint);
         if (!equal(currentPoint, point)) {
           current.points.push(point);
-          if (++points > MAX_POINTS) fail("AI geometry exceeds 100000 vertices.");
+          vertex();
         }
         currentPoint = point;
       }
@@ -252,7 +361,9 @@
       function paint(operator) {
         const fill = /[fFbB]/.test(operator);
         if (["s", "b", "b*"].includes(operator)) close();
-        if (operator !== "n") {
+        if (operator !== "n" && hidden()) excluded.paths += subpaths.length;
+        else if (operator !== "n") {
+          if (subpaths.length && state.blocked) fail(state.blocked);
           for (const path of subpaths) {
             if (path.controls.some(p => state.clips.some(polygon => !inside(p, polygon)))) {
               fail("Artwork intersects a clipping boundary. Prepare unclipped paths inside the artboard before converting.");
@@ -274,7 +385,7 @@
             if (paths.length > 512) fail("AI artwork exceeds 512 paths.");
           }
         }
-        if (pendingClip) {
+        if (pendingClip) stateEffect(() => {
           if (subpaths.length !== 1 || subpaths[0].points.length > 64) fail("Complex clipping paths are unsupported.");
           const polygon = subpaths[0].points.slice();
           if (polygon.length > 1 && equal(polygon[0], polygon[polygon.length - 1])) polygon.pop();
@@ -283,15 +394,35 @@
               subpaths[0].curved) fail("Curved or non-convex clipping paths are unsupported.");
           state.clips.push(polygon.slice());
           if (state.clips.length > 32) fail("AI clipping nesting exceeds the limit.");
-        }
+        });
         current = currentPoint = null; subpaths = []; pendingClip = false;
       }
+      function invoke(key) {
+        if (hidden()) { excluded.objects++; return; }
+        const form = resource(resources, "XObject", key);
+        const raster = () => fail("Raster images and non-vector objects are unsupported. Trace or remove them in Illustrator first.");
+        if (!(form instanceof PDF.PDFRawStream)) raster();
+        const layer = get(form.dict, "OC");
+        if (layer !== undefined && !visibleLayer(layer)) { excluded.objects++; return; }
+        if (named(get(form.dict, "Subtype")) !== "Form") raster();
+        if (get(form.dict, "Ref") || get(form.dict, "OPI")) fail("Externally referenced artwork is unsupported.");
+        if (activeForms.has(form)) fail("Recursive AI form references are unsupported.");
+        group(form.dict);
+        const ownMatrix = get(form.dict, "Matrix");
+        const formMatrix = multiply(state.matrix, ownMatrix === undefined ? [1, 0, 0, 1, 0, 0] : array(ownMatrix, 6));
+        const box = rectangle(formMatrix, array(get(form.dict, "BBox"), 4));
+        activeForms.add(form);
+        run(decode(form), get(form.dict, "Resources") || resources,
+          { matrix: formMatrix, clips: state.clips.concat([box]), blocked: state.blocked }, depth + 1);
+        activeForms.delete(form);
+      }
+      const insidePath = () => { if (subpaths.length || pendingClip) fail("Marked content cannot interrupt an AI path object."); };
       for (const token of tokens(text)) {
         if (!token?.operator) { args.push(token); continue; }
         if (++operations > 100000) fail("AI content exceeds 100000 operations.");
         const op = token.operator;
         if (op === "q") {
-          numbers(0); stack.push({ matrix: state.matrix.slice(), clips: state.clips.slice() });
+          numbers(0); stack.push({ matrix: state.matrix.slice(), clips: state.clips.slice(), blocked: state.blocked });
           if (stack.length > 64) fail("AI graphics-state nesting exceeds the limit.");
         } else if (op === "Q") {
           numbers(0); if (!stack.length) fail("Unbalanced AI graphics state."); state = stack.pop();
@@ -322,58 +453,70 @@
         } else if (["S", "s", "f", "F", "f*", "B", "B*", "b", "b*", "n"].includes(op)) {
           numbers(0); paint(op);
         } else if (op === "Do") {
-          const form = resource(resources, "XObject", oneName());
-          if (!(form instanceof PDF.PDFRawStream) || named(get(form.dict, "Subtype")) !== "Form") fail("Raster images and non-vector objects are unsupported. Trace or remove them in Illustrator first.");
-          if (get(form.dict, "Ref") || get(form.dict, "OPI")) fail("Externally referenced artwork is unsupported.");
-          if (get(form.dict, "OC") !== undefined) fail("Optional/hidden form artwork is unsupported. Flatten layer visibility first.");
-          if (activeForms.has(form)) fail("Recursive AI form references are unsupported.");
-          group(form.dict);
-          const ownMatrix = get(form.dict, "Matrix");
-          const formMatrix = multiply(state.matrix, ownMatrix === undefined ? [1, 0, 0, 1, 0, 0] : array(ownMatrix, 6));
-          const box = rectangle(formMatrix, array(get(form.dict, "BBox"), 4));
-          activeForms.add(form);
-          run(decode(form), get(form.dict, "Resources") || resources, { matrix: formMatrix, clips: state.clips.concat([box]) }, depth + 1);
-          activeForms.delete(form);
+          invoke(oneName());
         } else if (op === "gs") {
-          graphicsState(resource(resources, "ExtGState", oneName()));
+          const key = oneName();
+          stateEffect(() => graphicsState(resource(resources, "ExtGState", key)));
         } else if (["g", "G", "rg", "RG", "k", "K"].includes(op)) {
           numbers(op.length === 1 && op.toLowerCase() === "g" ? 1 : op.toLowerCase() === "rg" ? 3 : 4);
         } else if (["cs", "CS"].includes(op)) {
           const color = oneName();
-          const value = ["DeviceGray", "DeviceRGB", "DeviceCMYK", "Pattern"].includes(color) ? name(color) : resource(resources, "ColorSpace", color);
-          const kind = named(value instanceof PDF.PDFArray ? value.lookup(0) : value);
-          if (!["DeviceGray", "DeviceRGB", "DeviceCMYK", "CalGray", "CalRGB", "Lab", "ICCBased", "Indexed", "Separation", "DeviceN"].includes(kind)) fail("Pattern or unsupported color-space content cannot be converted.");
-          if ((kind === "Separation" && named(value.lookup(1)) === "None") ||
-              (kind === "DeviceN" && (!(value.lookup(1) instanceof PDF.PDFArray) ||
-                value.lookup(1).asArray().some(v => named(context.lookup(v)) === "None")))) {
-            fail("Invisible None colorants are unsupported. Remove invisible artwork first.");
-          }
+          stateEffect(() => {
+            const value = ["DeviceGray", "DeviceRGB", "DeviceCMYK", "Pattern"].includes(color) ? name(color) : resource(resources, "ColorSpace", color);
+            const kind = named(value instanceof PDF.PDFArray ? value.lookup(0) : value);
+            if (!["DeviceGray", "DeviceRGB", "DeviceCMYK", "CalGray", "CalRGB", "Lab", "ICCBased", "Indexed", "Separation", "DeviceN"].includes(kind)) fail("Pattern or unsupported color-space content cannot be converted.");
+            if ((kind === "Separation" && named(value.lookup(1)) === "None") ||
+                (kind === "DeviceN" && (!(value.lookup(1) instanceof PDF.PDFArray) ||
+                  value.lookup(1).asArray().some(v => named(context.lookup(v)) === "None")))) {
+              fail("Invisible None colorants are unsupported. Remove invisible artwork first.");
+            }
+          });
         } else if (["sc", "SC", "scn", "SCN"].includes(op)) {
-          if (!args.length || !args.every(v => typeof v === "number" && Number.isFinite(v))) fail("Pattern fills are unsupported.");
+          stateEffect(() => {
+            if (!args.length || !args.every(v => typeof v === "number" && Number.isFinite(v))) fail("Pattern fills are unsupported.");
+          });
         } else if (["w", "J", "j", "M", "i"].includes(op)) {
           numbers(1);
         } else if (op === "ri") {
           oneName();
         } else if (op === "d") {
-          if (args.length !== 2 || !Array.isArray(args[0]) || args[0].length || typeof args[1] !== "number") fail("Dashed strokes are unsupported. Outline/expand strokes first.");
+          stateEffect(() => {
+            if (args.length !== 2 || !Array.isArray(args[0]) || args[0].length || typeof args[1] !== "number") fail("Dashed strokes are unsupported. Outline/expand strokes first.");
+          });
         } else if (op === "BMC") {
-          if (oneName() === "OC") fail("Optional/hidden layers are unsupported. Flatten layer visibility first.");
-          marks++;
+          insidePath();
+          if (oneName() === "OC") fail("Layer marked content needs a /Properties reference (/OC /Name BDC).");
+          marks.push(false);
+        } else if (op === "BDC") {
+          insidePath();
+          if (args.length !== 2 || args[0]?.name !== "OC" || typeof args[1]?.name !== "string") {
+            fail("Unsupported AI/PDF marked content: only /OC layer references with a named /Properties entry can be converted.");
+          }
+          const visible = visibleLayer(resource(resources, "Properties", args[1].name));
+          marks.push(!visible);
+          if (!visible) hiddenMarks++;
         } else if (op === "EMC") {
-          numbers(0); if (--marks < 0) fail("Unbalanced AI marked content.");
+          numbers(0); insidePath();
+          if (!marks.length) fail("Unbalanced AI marked content.");
+          if (marks.pop()) hiddenMarks--;
         } else if (op === "BX" || op === "EX") {
           numbers(0); compatibility += op === "BX" ? 1 : -1;
           if (compatibility < 0) fail("Unbalanced AI compatibility section.");
         } else if (op === "MP") {
           oneName();
         } else if (op === "BT" || op === "ET" || /^T/.test(op) || op === "'" || op === "\"") {
-          fail("Live text or a non-PDF-compatible AI placeholder is unsupported. Enable Create PDF Compatible File and convert text to outlines in Illustrator.");
+          if (!hidden()) fail("Live text or a non-PDF-compatible AI placeholder is unsupported. Enable Create PDF Compatible File and convert text to outlines in Illustrator.");
+          if (op === "BT") excluded.objects++;
+          // Render modes 4-7 add glyph outlines to the clipping path, which could outlive the hidden layer.
+          if (op === "Tr") stateEffect(() => { if (args.length !== 1 || !(args[0] >= 0 && args[0] < 4)) fail("Text clipping modes are unsupported."); });
+        } else if (op === "sh" && hidden()) {
+          oneName(); excluded.objects++;
         } else {
-          fail("Unsupported AI/PDF operator " + op + " (for example images, gradients or optional content). Expand the artwork to plain vector paths first.");
+          fail("Unsupported AI/PDF operator " + op + " (for example inline images or shading). Expand the artwork to plain vector paths first.");
         }
         args.length = 0;
       }
-      if (args.length || stack.length || subpaths.length || pendingClip || marks || compatibility) fail("Incomplete or unbalanced AI content; no DXF was produced.");
+      if (args.length || stack.length || subpaths.length || pendingClip || marks.length || compatibility) fail("Incomplete or unbalanced AI content; no DXF was produced.");
     }
     group(page.node);
     const content = page.node.Contents();
@@ -382,9 +525,12 @@
       for (const entry of content.asArray()) text += decode(context.lookup(entry));
     } else if (content !== undefined) text = decode(content);
     run(text, page.node.Resources(), { matrix, clips: [clip] });
-    if (!paths.length) fail("No painted vector paths were found in the PDF-compatible AI content.");
+    if (!paths.length) {
+      fail(excluded.paths + excluded.objects ? "All vector artwork is in hidden layers, so no visible paths remain to convert. Show a layer in Illustrator and save again."
+        : "No painted vector paths were found in the PDF-compatible AI content.");
+    }
     return { version, paths, closed, width: (rotation % 180 ? height : width) * scale,
-      height: (rotation % 180 ? width : height) * scale, tolerance };
+      height: (rotation % 180 ? width : height) * scale, tolerance, excluded };
   }
   return { version, tolerance, convert };
 });

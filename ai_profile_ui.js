@@ -1,12 +1,19 @@
 "use strict";
 
 (function () {
-  const version = "1.6.0";
+  const version = "1.6.1";
   const get = id => document.getElementById("ai-" + id);
   const input = get("file"), consent = get("geometry"), convert = get("convert"), download = get("download");
   const preview = get("preview"), status = get("status");
   let worker = null, timer = null, serial = 0, result = null;
   const message = (level, text) => { status.textContent = "[" + level + "] " + text + " | exporter " + version; };
+  function excludedNote(excluded) {
+    const paths = Number(excluded && excluded.paths) || 0, objects = Number(excluded && excluded.objects) || 0;
+    if (paths + objects <= 0) return "";
+    const names = Array.isArray(excluded.layers) ? excluded.layers.map(String) : [];
+    return " Hidden layer artwork was not exported (" + paths + " paths, " + objects + " other objects) in: " +
+      (names.slice(0, 5).join(", ") + (names.length > 5 ? ", ..." : "") || "unnamed layer") + ".";
+  }
   function stop() {
     if (worker) worker.terminate();
     worker = null;
@@ -65,7 +72,8 @@
           preview.replaceChildren(path); result = value; download.disabled = false;
           const closed = value.closed.filter(Boolean).length;
           message("OK", value.paths.length + " paths (" + closed + " closed, " + (value.paths.length - closed) +
-            " open), artboard " + value.width.toFixed(3) + " x " + value.height.toFixed(3) + " mm; curve tolerance " + value.tolerance + " mm.");
+            " open), artboard " + value.width.toFixed(3) + " x " + value.height.toFixed(3) + " mm; curve tolerance " + value.tolerance + " mm." +
+            excludedNote(value.excluded));
         } catch (error) { failed(error.message || "Could not preview the AI geometry."); }
       };
       worker.postMessage(bytes, [bytes]);
@@ -79,7 +87,8 @@
       const filename = ImageProfile.dxfFilename(get("filename").value);
       const blob = new Blob([ImageProfile.dxf(result.paths, result.closed)], { type: "application/dxf" });
       await triggerSaveFile(blob, filename, "application/dxf");
-      message("OK", "DXF save requested: " + filename);
+      const note = excludedNote(result.excluded);
+      message("OK", "DXF save requested: " + filename + (note ? "." + note : ""));
     } catch (error) { message("ERROR", error.message || "Could not save the DXF."); }
   });
   message("IDLE", "Load a PDF-compatible AI file.");

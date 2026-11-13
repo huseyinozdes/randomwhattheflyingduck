@@ -9,10 +9,10 @@ function stream(content, dictionary = "", compressed = false) {
     data, Buffer.from("\nendstream")]);
 }
 
-function fixture(content, { page = "", resources = "<< >>", objects = [], compressed = false, secondPage = false, trailer = "" } = {}) {
+function fixture(content, { page = "", resources = "<< >>", objects = [], compressed = false, secondPage = false, trailer = "", catalog = "" } = {}) {
   const pageDictionary = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 512 512] /Resources ${resources} /Contents 4 0 R ${page} >>`;
   const all = [
-    "<< /Type /Catalog /Pages 2 0 R >>",
+    `<< /Type /Catalog /Pages 2 0 R ${catalog} >>`,
     `<< /Type /Pages /Kids [3 0 R${secondPage ? ` ${objects.length + 5} 0 R` : ""}] /Count ${secondPage ? 2 : 1} >>`,
     pageDictionary,
     stream(content, "", compressed),
@@ -33,4 +33,14 @@ function fixture(content, { page = "", resources = "<< >>", objects = [], compre
   return new Uint8Array(Buffer.concat(chunks));
 }
 
-module.exports = { fixture, stream };
+const group = (name, extra = "") => `<< /Type /OCG /Name (${name}) /Intent [/View /Design] ${extra} >>`;
+
+// Layers are objects 5.. in order (content names them /MC0, /MC1, ...); any further `objects` follow them.
+function layered(content, { groups = [group("Layer 1")], config = "/ON [5 0 R]", extra = "", objects = [], properties, catalog, ...options } = {}) {
+  const refs = groups.map((_, i) => `${5 + i} 0 R`).join(" ");
+  return fixture(content, { ...options, objects: [...groups, ...objects],
+    resources: `<< /Properties << ${properties ?? groups.map((_, i) => `/MC${i} ${5 + i} 0 R`).join(" ")} >> ${extra} >>`,
+    catalog: catalog ?? `/OCProperties << /OCGs [${refs}] /D << ${config} >> >>` });
+}
+
+module.exports = { fixture, stream, group, layered };
