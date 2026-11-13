@@ -53,7 +53,7 @@ test("index.html includes core UI handlers expected by shipped tabs", () => {
 });
 
 test("profile UI traces source pixels and previews exactly the exported geometry", async () => {
-  const { trace, geometry, dxf, version } = require("../image_profile");
+  const { trace, geometry, dxf, dxfFilename, version } = require("../image_profile");
   const elements = new Map();
   const fields = {
     width: "204.8", height: "102.4", threshold: "128", simplify: "0",
@@ -93,7 +93,7 @@ test("profile UI traces source pixels and previews exactly the exported geometry
       },
       body: { appendChild() {} },
     },
-    ImageProfile: { trace, geometry(loops, ...args) { exported = geometry(loops, ...args); return exported; }, dxf, version },
+    ImageProfile: { trace, geometry(loops, ...args) { exported = geometry(loops, ...args); return exported; }, dxf, dxfFilename, version },
     setTimeout(callback, delay) { if (delay === 100) render = callback; return 1; }, clearTimeout() {},
     URL: { createObjectURL: () => "blob:test", revokeObjectURL() {} },
     Blob,
@@ -163,7 +163,14 @@ test("profile script URLs bypass unversioned cache entries and match the engine 
   assert.equal(require("../package.json").version, version);
   assert.equal(require("../package-lock.json").version, version);
   assert.equal(require("../package-lock.json").packages[""].version, version);
-  for (const filename of ["image_profile.js", "image_profile_ui.js"]) {
+  assert.equal(require("../ai_profile").version, version);
+  const worker = fs.readFileSync(path.join(__dirname, "..", "ai_profile_worker.js"), "utf8");
+  assert.ok(worker.includes(`"ai_profile.js?v=${version}"`), "worker bypasses older converter cache");
+  const pdfVersion = require("../package.json").devDependencies["pdf-lib"];
+  const vendorPath = `vendor/pdf-lib-${pdfVersion}.min.js`;
+  assert.ok(worker.includes(`"${vendorPath}"`), "worker uses the pinned local parser");
+  assert.ok(fs.existsSync(path.join(__dirname, "..", vendorPath)), "parser is shipped with the static page");
+  for (const filename of ["image_profile.js", "image_profile_ui.js", "ai_profile_ui.js"]) {
     const source = html.match(new RegExp(`src="(${filename.replace(/\./g, "\\.")}[^"]*)"`))?.[1];
     assert.ok(source, `${filename} script is present`);
     assert.equal(new URL(source, "https://example.test/").searchParams.get("v"), version);

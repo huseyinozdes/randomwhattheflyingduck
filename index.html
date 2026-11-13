@@ -125,7 +125,7 @@
           <label for="user-initials" class="text-[11px]" style="color: rgb(122, 122, 122);">OPERATOR INITIALS</label>
           <input id="user-initials" type="text" class="native-input brd bg-transparent px-2 py-1 text-[12px] w-20 text-neutral-200 text-center" maxlength="8" placeholder="ENG">
         </div>
-        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-size: 12px;">build 1.5.1 // status: online</p>
+        <p class="sm:text-right" style="color: rgb(106, 106, 106); font-size: 12px;">build 1.6.0 // status: online</p>
       </div>
     </header>
 
@@ -229,7 +229,7 @@
 
       <section id="tab-conversion" class="tab-content" role="tabpanel" aria-labelledby="tab-btn-conversion">
         <h2 style="color: rgb(245, 245, 245); font-weight: 700; font-size: 15px;">[ CONVERSION ]</h2>
-        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">bidirectional engineering unit conversion.</p>
+        <p class="mt-1 mb-5" style="color: rgb(122, 122, 122); font-size: 12px;">engineering units and local vector-file conversion.</p>
 
         <div class="converter-pair">
           <div class="converter-input">
@@ -277,6 +277,30 @@
             <label style="font-size: 11px; color: rgb(122, 122, 122); margin-bottom: 3px;">KILOGRAMS</label>
             <input type="number" id="conv-kg" class="native-input brd bg-transparent px-2 py-1 text-[12px]" placeholder="0" oninput="convertWeight('kg')" step="0.01">
           </div>
+        </div>
+        <div class="brd px-4 py-4 mt-6">
+          <h3 class="mb-3" style="color: rgb(245,245,245); font-size: 13px;">[ ADOBE AI TO DXF ]</h3>
+          <p class="info-panel mb-4">Reads the PDF representation of a single-artboard AI file, entirely in your browser.
+            In Illustrator, enable <strong>Create PDF Compatible File</strong> and convert text to outlines.
+            Legacy PostScript AI, private-only AI, live text, images, gradients, optional layers and transparency are unsupported.
+            Clipping is accepted only when it does not trim artwork. Unsupported content rejects the entire conversion.</p>
+          <label for="ai-file" class="block mb-3" style="font-size: 12px;">SOURCE AI FILE (maximum 10 MiB)
+            <input id="ai-file" type="file" accept=".ai" class="native-input brd px-2 py-2 w-full mt-2">
+          </label>
+          <label class="block mb-3" style="font-size: 12px;"><input id="ai-geometry" type="checkbox">
+            Export path geometry only: filled boundaries and stroke centerlines, not colors, fill appearance or stroke widths.
+            Overlapping paths are retained, not visually combined.
+          </label>
+          <p class="mb-3" style="font-size: 11px; color: rgb(138,138,138);">Native scale is retained in millimetres.
+            Curves become polylines with 0.01 mm approximation tolerance. Open paths remain open.
+            Inspect dimensions and paths before cutting; no kerf compensation is provided.</p>
+          <button id="ai-convert" type="button" class="btn brd px-4 py-2 w-full mb-3" style="background: rgb(28,28,28); font-size: 13px;">convert ai locally</button>
+          <svg id="ai-preview" class="brd w-full mb-3" style="height: 240px; background: rgb(22,22,22);" role="img" aria-label="AI to DXF path preview"></svg>
+          <p id="ai-status" class="text-[13px] mb-3" aria-live="polite">[ IDLE ] load an AI file</p>
+          <label for="ai-filename" class="block mb-3" style="font-size: 12px;">DXF FILE NAME
+            <input id="ai-filename" type="text" value="converted" class="native-input brd bg-transparent px-2 py-1 w-full">
+          </label>
+          <button id="ai-download" type="button" disabled class="btn brd px-4 py-2 w-full" style="background: rgb(229,229,229); color: rgb(17,17,17); font-weight: 700; font-size: 13px;">download dxf</button>
         </div>
       </section>
 
@@ -920,7 +944,8 @@
       addDaysToDate();
     });
   </script>
-  <script src="image_profile.js?v=1.5.1"></script>
-  <script src="image_profile_ui.js?v=1.5.1"></script>
+  <script src="image_profile.js?v=1.6.0"></script>
+  <script src="image_profile_ui.js?v=1.6.0"></script>
+  <script src="ai_profile_ui.js?v=1.6.0"></script>
 </body>
 </html>

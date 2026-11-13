@@ -1,11 +1,14 @@
 {
   "name": "randomwhattheflyingduck",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "private": true,
   "description": "Mini-tool adapter verification gate scripts",
   "scripts": {
-    "lint": "node --check mini_tool_engine_adapter.js && node --check image_profile.js && node --check image_profile_ui.js",
-    "build": "node -e \"console.log('build: no-op for static browser project')\"",
+    "lint": "node --check mini_tool_engine_adapter.js && node --check image_profile.js && node --check image_profile_ui.js && node --check ai_profile.js && node --check ai_profile_ui.js && node --check ai_profile_worker.js && node --check scripts/build-vendor.js",
+    "build": "node scripts/build-vendor.js",
     "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "pdf-lib": "1.17.1"
   }
 }
