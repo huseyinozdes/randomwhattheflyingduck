@@ -159,6 +159,10 @@ test("profile UI traces source pixels and previews exactly the exported geometry
 test("profile script URLs bypass unversioned cache entries and match the engine build", () => {
   const { version } = require("../image_profile");
   const html = readIndexHtml();
+  assert.ok(html.includes(`build ${version} // status: online`));
+  assert.equal(require("../package.json").version, version);
+  assert.equal(require("../package-lock.json").version, version);
+  assert.equal(require("../package-lock.json").packages[""].version, version);
   for (const filename of ["image_profile.js", "image_profile_ui.js"]) {
     const source = html.match(new RegExp(`src="(${filename.replace(/\./g, "\\.")}[^"]*)"`))?.[1];
     assert.ok(source, `${filename} script is present`);

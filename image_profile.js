@@ -349,5 +349,5 @@
     lines.push(0, "EOF", "");
     return lines.join("\r\n");
   }
-  return { trace, geometry, dxf, version: "2026-11-13.3" };
+  return { trace, geometry, dxf, version: "1.5.1" };
 });
