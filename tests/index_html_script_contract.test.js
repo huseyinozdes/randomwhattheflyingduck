@@ -156,6 +156,19 @@ test("profile UI traces source pixels and previews exactly the exported geometry
   assert.ok(elements.get("profile-status").textContent.includes("Outdated page layout"));
 });
 
+test("Conversion tab presents unit conversion and Adobe AI to DXF as matching peer subsections", () => {
+  const html = readIndexHtml();
+  assert.ok(!html.includes("[ CONVERSION ]"), "the old combined label was renamed");
+  const section = html.match(/<section id="tab-conversion"[\s\S]*?<\/section>/)[0];
+  const headings = [...section.matchAll(/<(h[1-6])([^>]*)>([^<]*)<\/\1>\s*<p([^>]*)>/g)]
+    .map(([, tag, attributes, text, description]) => ({ tag, attributes: attributes.trim(), text, description: description.trim() }));
+  assert.deepEqual(headings.map(heading => heading.text), ["[ UNIT CONVERSION ]", "[ ADOBE AI TO DXF ]"]);
+  assert.equal(headings[0].tag, headings[1].tag);
+  assert.equal(headings[0].attributes, headings[1].attributes, "both headings share font, size, weight, colour and spacing");
+  assert.equal(headings[0].description, headings[1].description, "both descriptions share spacing and typography");
+  assert.equal([...section.matchAll(/<h[1-6][\s>]/g)].length, 2, "no other heading competes with the two subsections");
+});
+
 test("profile script URLs bypass unversioned cache entries and match the engine build", () => {
   const { version } = require("../image_profile");
   const html = readIndexHtml();
@@ -166,6 +179,8 @@ test("profile script URLs bypass unversioned cache entries and match the engine 
   assert.equal(require("../ai_profile").version, version);
   const worker = fs.readFileSync(path.join(__dirname, "..", "ai_profile_worker.js"), "utf8");
   assert.ok(worker.includes(`"ai_profile.js?v=${version}"`), "worker bypasses older converter cache");
+  const aiUi = fs.readFileSync(path.join(__dirname, "..", "ai_profile_ui.js"), "utf8");
+  assert.ok(aiUi.includes(`const version = "${version}";`), "AI UI build matches the converter");
   const pdfVersion = require("../package.json").devDependencies["pdf-lib"];
   const vendorPath = `vendor/pdf-lib-${pdfVersion}.min.js`;
   assert.ok(worker.includes(`"${vendorPath}"`), "worker uses the pinned local parser");

@@ -1,7 +1,7 @@
 "use strict";
 
 const ImageProfileUI = (function () {
-  const expectedVersion = "1.6.0";
+  const expectedVersion = "1.6.1";
   const get = id => document.getElementById("profile-" + id);
   const fields = ["width", "height", "lock", "threshold", "simplify", "invert", "quality", "frame", "frame-width", "frame-height"];
   const svg = get("preview"), status = get("status"), download = get("download");

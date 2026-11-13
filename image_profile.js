@@ -360,5 +360,5 @@
     }
     return stem + ".dxf";
   }
-  return { trace, geometry, dxf, dxfFilename, version: "1.6.0" };
+  return { trace, geometry, dxf, dxfFilename, version: "1.6.1" };
 });
